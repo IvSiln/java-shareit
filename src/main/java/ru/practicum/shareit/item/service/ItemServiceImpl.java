@@ -2,7 +2,6 @@ package ru.practicum.shareit.item.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.exception.BadRequestException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.mapper.ItemMapper;
@@ -95,18 +94,6 @@ public class ItemServiceImpl implements ItemService {
         }
         if (available != null) {
             item.setAvailable(available);
-        }
-    }
-
-    private void validateItemDataAndId(Optional<Item> item) {
-        if (!item.isPresent()) {
-            throw new NotFoundException("Item not found");
-        }
-        if (item.get().getName().isBlank()) {
-            throw new BadRequestException("Name can't be blank");
-        }
-        if (item.get().getDescription().isBlank()) {
-            throw new BadRequestException("Description can't be blank");
         }
     }
 
