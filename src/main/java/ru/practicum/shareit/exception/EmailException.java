@@ -1,7 +1,9 @@
 package ru.practicum.shareit.exception;
 
-public class EmailException extends RuntimeException {
+import org.springframework.http.HttpStatus;
+
+public class EmailException extends ApiException {
     public EmailException(String message) {
-        super(message);
+        super(HttpStatus.CONFLICT, message);
     }
 }

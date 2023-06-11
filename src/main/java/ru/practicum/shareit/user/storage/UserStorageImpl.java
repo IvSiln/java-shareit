@@ -1,24 +1,22 @@
 package ru.practicum.shareit.user.storage;
 
 import org.springframework.stereotype.Component;
-import ru.practicum.shareit.exception.EmailException;
-import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.user.model.User;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 
 @Component
 public class UserStorageImpl implements UserStorage {
-    private Long increment = 0L;
     private final Map<Long, User> users = new HashMap<>();
+    private long increment = 0L;
 
     @Override
-    public User get(Long id) {
-        validateId(id);
-        return users.get(id);
+    public Optional<User> get(Long id) {
+        return Optional.ofNullable(users.get(id));
     }
 
     @Override
@@ -28,7 +26,6 @@ public class UserStorageImpl implements UserStorage {
 
     @Override
     public User add(User user) {
-        validateEmail(user);
         user.setId(++increment);
         users.put(user.getId(), user);
         return user;
@@ -36,17 +33,18 @@ public class UserStorageImpl implements UserStorage {
 
     @Override
     public User patch(User user) {
-        validateId(user.getId());
-        validateEmail(user);
-        User patchedUser = users.get(user.getId());
-        if (user.getName() != null && !user.getName().isEmpty()) {
-            patchedUser.setName(user.getName());
-        }
-        if (user.getEmail() != null && !user.getEmail().isEmpty()) {
-            patchedUser.setEmail(user.getEmail());
-        }
+        User patchedUser = users.computeIfPresent(user.getId(), (key, value) -> {
+            if (user.getName() != null && !user.getName().isEmpty()) {
+                value.setName(user.getName());
+            }
+            if (user.getEmail() != null && !user.getEmail().isEmpty()) {
+                value.setEmail(user.getEmail());
+            }
+            return value;
+        });
         return patchedUser;
     }
+
 
     @Override
     public boolean delete(Long id) {
@@ -54,24 +52,11 @@ public class UserStorageImpl implements UserStorage {
         return !users.containsKey(id);
     }
 
-    private void validateId(Long id) {
-        if (id != 0 && !users.containsKey(id)) {
-            throw new NotFoundException("The user with the ID " +
-                    id + " is not registered!");
-        }
-    }
-
-    private void validateEmail(User user) {
-        if (isEmailAlreadyExists(user)) {
-            throw new EmailException("A user with this email address " +
-                    user.getEmail() + "already exists!");
-        }
-    }
-
-    private boolean isEmailAlreadyExists(User user) {
+    @Override
+    public Optional<User> findUserByEmail(String email) {
         return users.values()
                 .stream()
-                .anyMatch(stored -> stored.getEmail().equalsIgnoreCase(user.getEmail())
-                        && stored.getId() != user.getId());
+                .filter(user -> user.getEmail().equalsIgnoreCase(email))
+                .findFirst();
     }
 }

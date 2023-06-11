@@ -7,6 +7,7 @@ import ru.practicum.shareit.user.service.UserService;
 
 import javax.validation.Valid;
 import java.util.Collection;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/users")
@@ -15,7 +16,7 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping("/{id}")
-    public UserDto getUserById(@PathVariable Long id) {
+    public Optional<UserDto> getUserById(@PathVariable Long id) {
         return userService.get(id);
     }
 

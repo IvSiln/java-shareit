@@ -3,6 +3,7 @@ package ru.practicum.shareit.item.storage;
 import ru.practicum.shareit.item.model.Item;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface ItemStorage {
     /**
@@ -11,14 +12,17 @@ public interface ItemStorage {
      * @param id the ID of the item
      * @return the item object
      */
-    Item getItem(Long id);
+    Optional<Item> findItemById(Long id);
 
     /**
      * Retrieves a collection of all items.
      *
      * @return a collection of item objects
      */
-    List<Item> getAllItems();
+    List<Item> findAllItems();
+
+    List<Item> findAllItemsById(Long userId);
+
 
     /**
      * Adds an item to the storage.

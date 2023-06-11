@@ -1,7 +1,9 @@
 package ru.practicum.shareit.exception;
 
-public class PermissionException extends RuntimeException {
+import org.springframework.http.HttpStatus;
+
+public class PermissionException extends ApiException {
     public PermissionException(String message) {
-        super(message);
+        super(HttpStatus.FORBIDDEN, message);
     }
 }

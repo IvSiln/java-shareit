@@ -4,15 +4,16 @@ import ru.practicum.shareit.item.dto.ItemDto;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 public interface ItemService {
     /**
      * Возвращает DTO Вещи по идентификатору
      *
      * @param id идентификатор вещи
-     * @return ItemDto
+     * @return Optional объект ItemDto
      */
-    ItemDto getItem(Long id);
+    Optional<ItemDto> getItem(Long id);
 
     /**
      * Возвращает коллекцию DTO Вещей Пользователя
@@ -20,7 +21,7 @@ public interface ItemService {
      * @param userId идентификатор Пользователя владельца Вещи
      * @return коллекцию ItemDto
      */
-    List<ItemDto> getAllItemsByUserId(Long userId);
+    List<ItemDto> getAllByUserId(Long userId);
 
     /**
      * Реализует добавление Вещи в хранилище
@@ -29,7 +30,7 @@ public interface ItemService {
      * @param ownerId идентификатор Пользователя владельца
      * @return DTO добавленного объекта Item в хранилище
      */
-    ItemDto createItem(ItemDto itemDto, Long ownerId);
+    ItemDto create(ItemDto itemDto, Long ownerId);
 
     /**
      * Реализует обновление полей хранимой Вещи
@@ -39,14 +40,14 @@ public interface ItemService {
      * @param userId  идентификатор Пользователя
      * @return DTO обновленного объекта Item
      */
-    ItemDto updateItem(ItemDto itemDto, long itemId, long userId);
+    ItemDto update(ItemDto itemDto, long itemId, long userId);
 
     /**
      * Реализует удаление Вещи из хранилища
      *
      * @param id идентификатор удаляемой вещи
      */
-    void removeItem(Long id);
+    void remove(Long id);
 
     /**
      * Реализует поиск Вещей в хранилище по ключевому слову

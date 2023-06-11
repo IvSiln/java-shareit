@@ -3,6 +3,7 @@ package ru.practicum.shareit.user.service;
 import ru.practicum.shareit.user.dto.UserDto;
 
 import java.util.Collection;
+import java.util.Optional;
 
 public interface UserService {
     /**
@@ -11,7 +12,7 @@ public interface UserService {
      * @param id the identifier of the user
      * @return UserDto
      */
-    UserDto get(Long id);
+    Optional<UserDto> get(Long id);
 
     /**
      * Returns a collection of User DTOs.

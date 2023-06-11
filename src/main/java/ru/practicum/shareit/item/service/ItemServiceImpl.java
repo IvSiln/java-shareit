@@ -2,8 +2,8 @@ package ru.practicum.shareit.item.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.exception.BadRequestException;
 import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.exception.NotValidException;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
@@ -12,9 +12,8 @@ import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.storage.UserStorage;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -25,94 +24,96 @@ public class ItemServiceImpl implements ItemService {
     private final UserStorage userStorage;
 
     @Override
-    public ItemDto getItem(Long id) {
-        itemIdValidator(itemStorage.getItem(id));
-        return itemMapper.toItemDto(itemStorage.getItem(id));
+    public Optional<ItemDto> getItem(Long id) {
+        Optional<Item> item = itemStorage.findItemById(id);
+        //  validateItemDataAndId(item);
+        return item.map(itemMapper::toItemDto);
     }
 
     @Override
-    public List<ItemDto> getAllItemsByUserId(Long userId) {
-        return itemStorage.getAllItems()
-                .stream()
-                .filter(i -> Objects.equals(i.getOwner().getId(), userId))
-                .map(itemMapper::toItemDto)
-                .collect(Collectors.toList());
+    public List<ItemDto> getAllByUserId(Long userId) {
+        return itemStorage.findAllItemsById(userId).stream().map(itemMapper::toItemDto).collect(Collectors.toList());
     }
 
     @Override
-    public ItemDto createItem(ItemDto itemDto, Long userId) {
-        Item newItem = itemMapper.toItem(itemDto);
-        User owner = userStorage.get(userId);
-        itemOwnerCheckValidator(owner, newItem, userId);
-        Item createdItem = itemStorage.createItem(newItem);
-        return itemMapper.toItemDto(createdItem);
+    public ItemDto create(ItemDto itemDto, Long userId) {
+        Optional<User> owner = userStorage.get(userId);
+        return owner.map(user -> {
+                    Item newItem = itemMapper.toItem(itemDto);
+                    setOwnerIfValid(user, newItem);
+                    Item createdItem = itemStorage.createItem(newItem);
+                    return itemMapper.toItemDto(createdItem);
+                })
+                .orElseThrow(() -> new NotFoundException("User not found with id: " + userId));
+    }
+
+
+    @Override
+    public ItemDto update(ItemDto itemDto, long itemId, long userId) {
+        Optional<Item> oldItem = itemStorage.findItemById(itemId);
+        if (!isItemOwnedByUser(oldItem, userId)) {
+            throw new NotFoundException("User is not owner of this item!");
+        }
+        Item updatedItem = updateItemFields(oldItem, itemDto);
+        Item savedItem = itemStorage.updateItem(updatedItem);
+        return itemMapper.toItemDto(savedItem);
     }
 
     @Override
-    public ItemDto updateItem(ItemDto itemDto, long itemId, long userId) {
-        Item item = itemMapper.toItem(itemDto);
-        userIdValidator(userId);
-        Item oldItem = itemStorage.getItem(itemId);
-        itemOwnerNameDescAvailValidator(item, oldItem, userId);
-        Item changedItem = itemStorage.updateItem(oldItem);
-        return itemMapper.toItemDto(changedItem);
-    }
-
-    public void removeItem(Long id) {
-        itemIdValidator(itemStorage.getItem(id));
+    public void remove(Long id) {
+        //validateItemDataAndId(itemStorage.findItemById(id));
         itemStorage.removeItem(id);
     }
 
     @Override
-    public Collection<ItemDto> searchItemsByDescription(String text) {
+    public List<ItemDto> searchItemsByDescription(String text) {
         if (text.isBlank()) {
             return new ArrayList<>();
         }
-        return itemStorage.getAllItems()
-                .stream()
-                .filter(i -> i.getDescription().toLowerCase().contains(text.toLowerCase()) && i.getAvailable())
-                .map(itemMapper::toItemDto)
-                .collect(Collectors.toList());
+        return itemStorage.findAllItems().stream().filter(i -> i.getDescription().toLowerCase().contains(text.toLowerCase()) && i.getAvailable()).map(itemMapper::toItemDto).collect(Collectors.toList());
     }
 
-    private void itemIdValidator(Item item) {
-        if (!itemStorage.getAllItems().contains(itemStorage.getItem(item.getId()))) {
-            throw new NotFoundException("Item with id " + itemStorage.getItem(item.getId()) + "not found");
-        }
-        if (item.getName().isBlank()) {
-            throw new NotValidException("Name cant be blank");
-        }
-        if (item.getDescription().isBlank()) {
-            throw new NotValidException("Description cant be blank");
-        }
+    private boolean isItemOwnedByUser(Optional<Item> item, long userId) {
+        return item.map(Item::getOwner)
+                .map(User::getId)
+                .filter(ownerId -> ownerId.equals(userId))
+                .isPresent();
     }
 
-    private void itemOwnerCheckValidator(User owner, Item newItem, long id) {
-        if (owner == null) {
-            throw new NotFoundException(String.format("User with id=%d not found", id));
-        } else {
-            newItem.setOwner(owner);
-        }
+    private Item updateItemFields(Optional<Item> item, ItemDto newItemDto) {
+        Item oldItem = item.orElseThrow(() -> new NotFoundException("Item not found"));
+        modifyItem(oldItem, newItemDto.getName(), newItemDto.getDescription(), newItemDto.getAvailable());
+        return oldItem;
     }
 
-    private void itemOwnerNameDescAvailValidator(Item item, Item oldItem, long userId) {
-        if (oldItem.getOwner().getId() != userId) {
-            throw new NotFoundException("User is not owner of this item!");
+    private void modifyItem(Item item, String name, String description, Boolean available) {
+        if (name != null) {
+            item.setName(name);
         }
-        if (item.getName() != null) {
-            oldItem.setName(item.getName());
+        if (description != null) {
+            item.setDescription(description);
         }
-        if (item.getDescription() != null) {
-            oldItem.setDescription(item.getDescription());
-        }
-        if (item.getAvailable() != null) {
-            oldItem.setAvailable(item.getAvailable());
+        if (available != null) {
+            item.setAvailable(available);
         }
     }
 
-    private void userIdValidator(Long userId) {
-        if (!userStorage.getAll().contains(userStorage.get(userId))) {
-            throw new NotFoundException(String.format("user with id = %d not found.", userId));
+    private void validateItemDataAndId(Optional<Item> item) {
+        if (!item.isPresent()) {
+            throw new NotFoundException("Item not found");
         }
+        if (item.get().getName().isBlank()) {
+            throw new BadRequestException("Name can't be blank");
+        }
+        if (item.get().getDescription().isBlank()) {
+            throw new BadRequestException("Description can't be blank");
+        }
+    }
+
+    private void setOwnerIfValid(User owner, Item newItem) {
+        Optional.ofNullable(owner).map(user -> {
+            newItem.setOwner(user);
+            return newItem;
+        }).orElseThrow(() -> new NotFoundException("User not found"));
     }
 }
