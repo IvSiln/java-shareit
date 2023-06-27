@@ -1,78 +1,75 @@
 package ru.practicum.shareit.user.service;
 
-import lombok.RequiredArgsConstructor;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.exception.EmailException;
+import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.mapper.UserMapper;
 import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.user.storage.UserStorage;
+import ru.practicum.shareit.user.repository.UserRepository;
 
-import java.util.Collection;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import javax.validation.ValidationException;
+import java.util.List;
 
 @Service
-@RequiredArgsConstructor
+@Transactional
+@Slf4j
+@AllArgsConstructor
 public class UserServiceImpl implements UserService {
-    private final UserMapper userMapper;
-    private final UserStorage userStorage;
+    @Autowired
+    private final UserRepository repository;
 
     @Override
-    public Optional<UserDto> get(Long id) {
-        return userStorage.get(id)
-                .map(userMapper::toUserDto);
+    public List<UserDto> findAll() {
+        List<User> users = repository.findAll();
+        return UserMapper.toUserDto(users);
     }
 
     @Override
-    public Collection<UserDto> getAll() {
-        return userStorage.getAll()
-                .stream()
-                .map(userMapper::toUserDto)
-                .collect(Collectors.toList());
+    public UserDto findById(long id) {
+        User user = repository.findById(id)
+                .orElseThrow(() -> new NotFoundException(String.format("Пользователь с id %d не найден", id)));
+        return UserMapper.toUserDto(user);
     }
 
     @Override
     public UserDto add(UserDto userDto) {
-        String email = userDto.getEmail();
-        if (userStorage.findUserByEmail(email).isPresent()) {
-            throw new EmailException("User with email " + email + " already exists");
-        }
-        User user = userMapper.toUser(userDto);
-        user.setEmail(email);
-        User savedUser = userStorage.add(user);
-        return userMapper.toUserDto(savedUser);
+        User user = UserMapper.toUser(userDto);
+        User userAdded = repository.save(user);
+        return UserMapper.toUserDto(userAdded);
     }
 
     @Override
-    public UserDto patch(UserDto userDto, Long id) {
-        User user = userMapper.toUser(userDto);
-        user.setId(id);
-        validateEmail(user);
-        User updatedUser = userStorage.patch(user);
-        return userMapper.toUserDto(updatedUser);
+    public UserDto patch(long id, UserDto userDto) {
+        User user = repository.findById(id)
+                .orElseThrow(() -> new NotFoundException(String.format("Пользователь с id %d не найден", id)));
+        String newName = userDto.getName();
+        String newEmail = userDto.getEmail();
+
+        if (newName != null) {
+            checkNotBlank(newName, "Имя");
+            user.setName(newName);
+        }
+        if (newEmail != null) {
+            checkNotBlank(newEmail, "Email");
+            user.setEmail(newEmail);
+        }
+        user = repository.save(user);
+        return UserMapper.toUserDto(user);
     }
 
-
-    @Override
-    public boolean delete(Long id) {
-        return userStorage.delete(id);
-    }
-
-    private void validateEmail(User user) {
-        if (isEmailAlreadyExists(user)) {
-            throw new EmailException("A user with this email address " +
-                    user.getEmail() + "already exists!");
+    private void checkNotBlank(String s, String parameterName) {
+        if (s.isBlank()) {
+            log.warn("{} не может быть пустым", parameterName);
+            throw new ValidationException(String.format("%s не может быть пустым", parameterName));
         }
     }
 
-    public boolean isEmailAlreadyExists(User user) {
-        return userStorage.getAll()
-                .stream()
-                .anyMatch(stored -> stored.getEmail().equalsIgnoreCase(user.getEmail())
-                        && stored.getId() != user.getId());
+    @Override
+    public void delete(long id) {
+        repository.deleteById(id);
     }
 }
-
-
-

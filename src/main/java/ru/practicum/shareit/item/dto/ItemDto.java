@@ -1,25 +1,30 @@
 package ru.practicum.shareit.item.dto;
 
-import lombok.AllArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-import ru.practicum.shareit.request.ItemRequest;
-import ru.practicum.shareit.user.model.User;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+
+import static ru.practicum.shareit.validation.ValidationType.Create;
 
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
+@Builder
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ItemDto {
     private Long id;
-    @NotBlank
+
+    @NotBlank(groups = Create.class, message = "Название не может быть пустым")
     private String name;
-    @NotBlank
+
+    @NotBlank(groups = Create.class, message = "Описание не может быть пустым")
+    @Size(max = 200, message = "Длина описания должна до 200 символов")
     private String description;
-    @NotNull
+
+    @NotNull(groups = Create.class, message = "Поле доступности вещи не может быть пустым")
     private Boolean available;
-    private User owner;
-    private ItemRequest request;
+
+    private Long requestId;
 }

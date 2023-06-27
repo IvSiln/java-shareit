@@ -1,59 +1,23 @@
 package ru.practicum.shareit.item.service;
 
+import ru.practicum.shareit.item.dto.CommentDto;
+import ru.practicum.shareit.item.dto.ItemBookingCommentsDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 
-import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 
 public interface ItemService {
-    /**
-     * Возвращает DTO Вещи по идентификатору
-     *
-     * @param id идентификатор вещи
-     * @return Optional объект ItemDto
-     */
-    Optional<ItemDto> getItem(Long id);
+    List<ItemBookingCommentsDto> findAllByUserId(long userId);
 
-    /**
-     * Возвращает коллекцию DTO Вещей Пользователя
-     *
-     * @param userId идентификатор Пользователя владельца Вещи
-     * @return коллекцию ItemDto
-     */
-    List<ItemDto> getAllByUserId(Long userId);
+    ItemBookingCommentsDto findById(long userId, long itemId);
 
-    /**
-     * Реализует добавление Вещи в хранилище
-     *
-     * @param itemDto DTO объект Вещи
-     * @param ownerId идентификатор Пользователя владельца
-     * @return DTO добавленного объекта Item в хранилище
-     */
-    ItemDto create(ItemDto itemDto, Long ownerId);
+    List<ItemDto> findByText(String text);
 
-    /**
-     * Реализует обновление полей хранимой Вещи
-     *
-     * @param itemDto объект Вещи с изменениями
-     * @param itemId  идентификатор Вещи
-     * @param userId  идентификатор Пользователя
-     * @return DTO обновленного объекта Item
-     */
-    ItemDto update(ItemDto itemDto, long itemId, long userId);
+    ItemDto add(long userId, ItemDto itemDto);
 
-    /**
-     * Реализует удаление Вещи из хранилища
-     *
-     * @param id идентификатор удаляемой вещи
-     */
-    void remove(Long id);
+    ItemDto patch(long userId, long itemId, ItemDto itemDto);
 
-    /**
-     * Реализует поиск Вещей в хранилище по ключевому слову
-     *
-     * @param keyword ключевое слово для поиска
-     * @return коллекцию DTO объектов Item
-     */
-    Collection<ItemDto> searchItemsByDescription(String keyword);
+    void delete(long userId, long itemId);
+
+    CommentDto addComment(Long userId, long itemId, CommentDto commentDto);
 }
