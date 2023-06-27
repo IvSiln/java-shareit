@@ -70,5 +70,4 @@ public class BookingController {
                                @RequestParam boolean approved) {
         return bookingService.patch(userId, bookingId, approved);
     }
-
 }

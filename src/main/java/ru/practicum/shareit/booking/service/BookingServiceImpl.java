@@ -31,21 +31,32 @@ import java.util.stream.Collectors;
 @Slf4j
 @AllArgsConstructor
 public class BookingServiceImpl implements BookingService {
+    public static final String END_DATE_AFTER_START_DATE_ERROR_MESSAGE = "The end date of the booking must be after the start date";
+    public static final String USER_IS_NOT_OWNER_MESSAGE = "A user with id {} does not own a thing with id {}";
+    private static final String USER_NOT_FOUND_MESSAGE = "User with id %d not found";
+    private static final String BOOKING_NOT_FOUND_MESSAGE = "Booking with id %d not found";
+    private static final String ITEM_NOT_FOUND_MESSAGE = "Item with id %d not found";
+    private static final String USER_IS_OWNER_MESSAGE = "The user with id %d is the owner of the item with id %d";
+    private static final String ITEM_NOT_AVAILABLE_MESSAGE = "Item with id %d is not available for booking";
+    private static final String BOOKING_ALREADY_APPROVED_MESSAGE = "Booking with id %d has already been confirmed";
+    private static final String BOOKING_ALREADY_REJECTED_MESSAGE = "Booking with id %d has already been rejected";
+    private static final String UNKNOWN_STATUS_MESSAGE = "Unknown state: UNSUPPORTED_STATUS";
+    private static final String USER_CANNOT_VIEW_BOOKING = "A user with id {} cannot view a booking with id {}";
     private final BookingRepository repository;
-    private final UserRepository userRepo;
-    private final ItemRepository itemRepo;
+    private final UserRepository userRepository;
+    private final ItemRepository itemRepository;
 
     @Override
     public BookingOutDto findById(Long userId, long bookingId) {
         checkUser(userId);
         Booking booking = repository.findById(bookingId)
-                .orElseThrow(() -> new NotFoundException(String.format("Бронирование с id %d не найдено", bookingId)));
+                .orElseThrow(() -> new NotFoundException(String.format(BOOKING_NOT_FOUND_MESSAGE, bookingId)));
         long bookerId = booking.getBooker().getId();
         long ownerId = booking.getItem().getOwner().getId();
         if (userId != bookerId && userId != ownerId) {
-            log.warn("Пользователь с id {} не может просматривать бронирование с id {}", userId, bookingId);
+            log.warn(USER_CANNOT_VIEW_BOOKING, userId, bookingId);
             throw new NotFoundException(
-                    String.format("Пользователь с id %d не может просматривать бронирование с id %d", userId, bookingId));
+                    String.format(USER_CANNOT_VIEW_BOOKING, userId, bookingId));
         }
         return BookingMapper.toBookingDtoOut(booking);
     }
@@ -75,8 +86,8 @@ public class BookingServiceImpl implements BookingService {
                 bookings = repository.findByBookerIdAndStatusOrderByStartDesc(userId, Status.REJECTED);
                 break;
             case UNKNOWN:
-                log.warn("Unknown state: UNSUPPORTED_STATUS");
-                throw new UnsupportedStatusException("Unknown state: UNSUPPORTED_STATUS");
+                log.warn(UNKNOWN_STATUS_MESSAGE);
+                throw new UnsupportedStatusException(UNKNOWN_STATUS_MESSAGE);
         }
         return bookings.stream().map(BookingMapper::toBookingDtoOut).collect(Collectors.toList());
     }
@@ -84,7 +95,7 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public List<BookingOutDto> findByOwnerItemsAndState(Long userId, State state) {
         checkUser(userId);
-        List<Item> items = itemRepo.findByOwnerId(userId);
+        List<Item> items = itemRepository.findByOwnerId(userId);
         if (items.isEmpty()) {
             return Collections.emptyList();
         }
@@ -112,8 +123,8 @@ public class BookingServiceImpl implements BookingService {
                 bookings = repository.findByItemIdInAndStatusOrderByStartDesc(itemIds, Status.REJECTED);
                 break;
             default:
-                log.warn("Unknown state: UNSUPPORTED_STATUS");
-                throw new UnsupportedStatusException("Unknown state: UNSUPPORTED_STATUS");
+                log.warn(UNKNOWN_STATUS_MESSAGE);
+                throw new UnsupportedStatusException(UNKNOWN_STATUS_MESSAGE);
         }
         return bookings.stream().map(BookingMapper::toBookingDtoOut).collect(Collectors.toList());
     }
@@ -125,18 +136,18 @@ public class BookingServiceImpl implements BookingService {
         long itemId = bookingDto.getItemId();
         Item item = checkItem(itemId);
         if (isOwner(userId, itemId)) {
-            log.warn("Пользователь с id {} владелец вещи с id {}", userId, item.getId());
+            log.warn(USER_IS_OWNER_MESSAGE, userId, item.getId());
             throw new OwnerBookingException(String.format(
-                    "Пользователь с id %d владелец вещи с id %d", userId, item.getId()));
+                    USER_IS_OWNER_MESSAGE, userId, item.getId()));
         }
         if (!item.isAvailable()) {
-            log.warn("Вещь с id {} недоступна для бронирования", item.getId());
+            log.warn(ITEM_NOT_AVAILABLE_MESSAGE, item.getId());
             throw new ValidationException(String.format(
-                    "Вещь с id %d  недоступна для бронирования", item.getId()));
+                    ITEM_NOT_AVAILABLE_MESSAGE, item.getId()));
         }
         if (!bookingDto.getEnd().isAfter(bookingDto.getStart())) {
-            log.warn("Дата окончания бронирования должна быть после даты начала");
-            throw new ValidationException("Дата окончания бронирования должна быть после даты начала");
+            log.warn(END_DATE_AFTER_START_DATE_ERROR_MESSAGE);
+            throw new ValidationException(END_DATE_AFTER_START_DATE_ERROR_MESSAGE);
         }
         Booking booking = BookingMapper.toBooking(bookingDto);
         booking.setBooker(booker);
@@ -151,23 +162,23 @@ public class BookingServiceImpl implements BookingService {
     public BookingOutDto patch(Long userId, long bookingId, boolean approved) {
         checkUser(userId);
         Booking booking = repository.findById(bookingId)
-                .orElseThrow(() -> new NotFoundException(String.format("Бронирование с id %d не найдено", bookingId)));
+                .orElseThrow(() -> new NotFoundException(String.format(BOOKING_NOT_FOUND_MESSAGE, bookingId)));
         long itemId = booking.getItem().getId();
         if (!isOwner(userId, itemId)) {
-            log.warn("Пользователь с id {} не владеет вещью с id {}", userId, itemId);
-            throw new NotFoundException(String.format("Пользователь с id %d не владеет вещью с id %d", userId, itemId));
+            log.warn(USER_IS_NOT_OWNER_MESSAGE, userId, itemId);
+            throw new NotFoundException(String.format(USER_IS_OWNER_MESSAGE, userId, itemId));
         }
         Status status;
         if (approved) {
             if (booking.getStatus().equals(Status.APPROVED)) {
-                log.warn("Бронирование с id {} уже подтверждено", bookingId);
-                throw new ValidationException(String.format("Бронирование с id %d уже подтверждено", bookingId));
+                log.warn(BOOKING_ALREADY_APPROVED_MESSAGE, bookingId);
+                throw new ValidationException(String.format(BOOKING_ALREADY_APPROVED_MESSAGE, bookingId));
             }
             status = Status.APPROVED;
         } else {
             if (booking.getStatus().equals(Status.REJECTED)) {
-                log.warn("Бронирование с id {} уже отклонено", bookingId);
-                throw new ValidationException(String.format("Бронирование с id %d уже отклонено", bookingId));
+                log.warn(BOOKING_ALREADY_REJECTED_MESSAGE, bookingId);
+                throw new ValidationException(String.format(BOOKING_ALREADY_REJECTED_MESSAGE, bookingId));
             }
             status = Status.REJECTED;
         }
@@ -177,16 +188,16 @@ public class BookingServiceImpl implements BookingService {
     }
 
     private User checkUser(Long userId) {
-        return userRepo.findById(userId)
-                .orElseThrow(() -> new NotFoundException(String.format("Пользователь с id %d не найден", userId)));
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException(String.format(USER_NOT_FOUND_MESSAGE, userId)));
     }
 
     private Item checkItem(Long itemId) {
-        return itemRepo.findById(itemId)
-                .orElseThrow(() -> new NotFoundException(String.format("Вещь с id %d не найдена", itemId)));
+        return itemRepository.findById(itemId)
+                .orElseThrow(() -> new NotFoundException(String.format(ITEM_NOT_FOUND_MESSAGE, itemId)));
     }
 
     private boolean isOwner(long userId, long itemId) {
-        return itemRepo.findByOwnerId(userId).stream().anyMatch(it -> it.getId() == itemId);
+        return itemRepository.findByOwnerId(userId).stream().anyMatch(it -> it.getId() == itemId);
     }
 }

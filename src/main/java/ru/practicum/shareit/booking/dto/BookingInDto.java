@@ -4,7 +4,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
 import lombok.Data;
 import ru.practicum.shareit.booking.enums.Status;
-import ru.practicum.shareit.validation.ValidationType.*;
+import ru.practicum.shareit.validation.ValidationType.Create;
+import ru.practicum.shareit.validation.ValidationType.Update;
 
 import javax.validation.constraints.FutureOrPresent;
 import javax.validation.constraints.NotNull;

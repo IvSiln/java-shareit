@@ -7,7 +7,6 @@ import ru.practicum.shareit.booking.enums.State;
 import java.util.List;
 
 public interface BookingService {
-
     BookingOutDto findById(Long userId, long bookingId);
 
     List<BookingOutDto> findByState(Long userId, State state);

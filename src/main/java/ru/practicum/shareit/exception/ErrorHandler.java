@@ -16,6 +16,7 @@ import org.springframework.web.servlet.NoHandlerFoundException;
 import javax.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 @RestControllerAdvice
 @Slf4j
@@ -62,7 +63,7 @@ public class ErrorHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleMethodArgumentTypeMismatchException(final MethodArgumentTypeMismatchException e) {
         ErrorResponse response = new ErrorResponse(String.format("Переменная %s: %s должна быть %s.",
-                e.getName(), e.getValue(), e.getRequiredType().getSimpleName()));
+                e.getName(), e.getValue(), Objects.requireNonNull(e.getRequiredType()).getSimpleName()));
         log.error("Переменная {}: {} должна быть {}.",
                 e.getName(), e.getValue(), e.getRequiredType().getSimpleName());
         return response;
