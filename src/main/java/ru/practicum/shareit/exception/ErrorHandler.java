@@ -24,42 +24,38 @@ public class ErrorHandler {
 
     private final ObjectMapper mapper = new ObjectMapper().findAndRegisterModules();
 
-    @ExceptionHandler
+    @ExceptionHandler(NotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleNotFoundException(final NotFoundException e) {
         log.error(e.getMessage(), e);
         return new ErrorResponse(e.getMessage());
     }
 
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse handleOwnerBookingException(final OwnerBookingException e) {
-        log.error(e.getMessage(), e);
-        return new ErrorResponse(e.getMessage());
-    }
-
-    @ExceptionHandler
+    @ExceptionHandler(ConflictException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
-    public ErrorResponse handleEmailExistException(final EmailExistException e) {
+    public ErrorResponse handleEmailExistException(final ConflictException e) {
         log.error(e.getMessage(), e);
         return new ErrorResponse(e.getMessage());
     }
 
-    @ExceptionHandler
+    @ExceptionHandler({ValidationException.class, UnsupportedStatusException.class, MethodArgumentNotValidException.class, MissingRequestHeaderException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleValidationException(final ValidationException e) {
+    public ErrorResponse handleValidationExceptions(final Exception e) throws JsonProcessingException {
+        if (e instanceof MethodArgumentNotValidException) {
+            Map<String, String> errors = new HashMap<>();
+            ((MethodArgumentNotValidException) e).getBindingResult().getFieldErrors().forEach((error) -> {
+                String fieldName = error.getField();
+                String message = error.getDefaultMessage();
+                errors.put(fieldName, message);
+            });
+            log.error(mapper.writeValueAsString(errors), e);
+            return new ErrorResponse(errors);
+        }
         log.error(e.getMessage(), e);
         return new ErrorResponse(e.getMessage());
     }
 
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleUnsupportedStatusException(final UnsupportedStatusException e) {
-        log.error(e.getMessage(), e);
-        return new ErrorResponse(e.getMessage());
-    }
-
-    @ExceptionHandler
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleMethodArgumentTypeMismatchException(final MethodArgumentTypeMismatchException e) {
         ErrorResponse response = new ErrorResponse(String.format("Переменная %s: %s должна быть %s.",
@@ -69,34 +65,14 @@ public class ErrorHandler {
         return response;
     }
 
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleMethodArgumentNotValid(final MethodArgumentNotValidException e) throws JsonProcessingException {
-        Map<String, String> errors = new HashMap<>();
-        e.getBindingResult().getFieldErrors().forEach((error) -> {
-            String fieldName = error.getField();
-            String message = error.getDefaultMessage();
-            errors.put(fieldName, message);
-        });
-        log.error(mapper.writeValueAsString(errors), e);
-        return new ErrorResponse(errors);
-    }
-
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleMissingRequestHeaderException(final MissingRequestHeaderException e) {
-        log.error(e.getMessage(), e);
-        return new ErrorResponse(e.getMessage());
-    }
-
-    @ExceptionHandler
+    @ExceptionHandler(NoHandlerFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleNoHandlerFoundException(final NoHandlerFoundException e, WebRequest request) {
         log.error("Неизвестный запрос.");
         return new ErrorResponse("Неизвестный запрос.");
     }
 
-    @ExceptionHandler
+    @ExceptionHandler(Throwable.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handleThrowable(final Throwable e) {
         log.error("Произошла непредвиденная ошибка.");

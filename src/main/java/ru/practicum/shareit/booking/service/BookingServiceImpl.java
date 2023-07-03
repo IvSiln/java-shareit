@@ -12,7 +12,6 @@ import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.exception.OwnerBookingException;
 import ru.practicum.shareit.exception.UnsupportedStatusException;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
@@ -31,70 +30,59 @@ import java.util.stream.Collectors;
 @Slf4j
 @AllArgsConstructor
 public class BookingServiceImpl implements BookingService {
-    public static final String END_DATE_AFTER_START_DATE_ERROR_MESSAGE = "The end date of the booking must be after the start date";
-    public static final String USER_IS_NOT_OWNER_MESSAGE = "A user with id {} does not own a thing with id {}";
-    private static final String USER_NOT_FOUND_MESSAGE = "User with id %d not found";
-    private static final String BOOKING_NOT_FOUND_MESSAGE = "Booking with id %d not found";
-    private static final String ITEM_NOT_FOUND_MESSAGE = "Item with id %d not found";
-    private static final String USER_IS_OWNER_MESSAGE = "The user with id %d is the owner of the item with id %d";
-    private static final String ITEM_NOT_AVAILABLE_MESSAGE = "Item with id %d is not available for booking";
-    private static final String BOOKING_ALREADY_APPROVED_MESSAGE = "Booking with id %d has already been confirmed";
-    private static final String BOOKING_ALREADY_REJECTED_MESSAGE = "Booking with id %d has already been rejected";
-    private static final String UNKNOWN_STATUS_MESSAGE = "Unknown state: UNSUPPORTED_STATUS";
-    private static final String USER_CANNOT_VIEW_BOOKING = "A user with id {} cannot view a booking with id {}";
-    private final BookingRepository repository;
+    private final BookingRepository bookingRepository;
     private final UserRepository userRepository;
     private final ItemRepository itemRepository;
 
     @Override
     public BookingOutDto findById(Long userId, long bookingId) {
-        checkUser(userId);
-        Booking booking = repository.findById(bookingId)
-                .orElseThrow(() -> new NotFoundException(String.format(BOOKING_NOT_FOUND_MESSAGE, bookingId)));
+        trowIfNotExist(userId);
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new NotFoundException(String.format("Бронирование с id %d не найдено", bookingId)));
         long bookerId = booking.getBooker().getId();
         long ownerId = booking.getItem().getOwner().getId();
         if (userId != bookerId && userId != ownerId) {
-            log.warn(USER_CANNOT_VIEW_BOOKING, userId, bookingId);
+            log.warn("Пользователь с id {} не может просматривать бронирование с id {}", userId, bookingId);
             throw new NotFoundException(
-                    String.format(USER_CANNOT_VIEW_BOOKING, userId, bookingId));
+                    String.format("Пользователь с id %d не может просматривать бронирование с id %d", userId, bookingId));
         }
         return BookingMapper.toBookingDtoOut(booking);
     }
 
     @Override
     public List<BookingOutDto> findByState(Long userId, State state) {
-        checkUser(userId);
+        trowIfNotExist(userId);
         List<Booking> bookings = new ArrayList<>();
         Instant now = Instant.now();
         switch (state) {
             case ALL:
-                bookings = repository.findByBookerIdOrderByStartDesc(userId);
+                bookings = bookingRepository.findByBookerIdOrderByStartDesc(userId);
                 break;
             case PAST:
-                bookings = repository.findByBookerIdAndEndIsBeforeOrderByStartDesc(userId, now);
+                bookings = bookingRepository.findByBookerIdAndEndIsBeforeOrderByStartDesc(userId, now);
                 break;
             case FUTURE:
-                bookings = repository.findByBookerIdAndStartIsAfterOrderByStartDesc(userId, now);
+                bookings = bookingRepository.findByBookerIdAndStartIsAfterOrderByStartDesc(userId, now);
                 break;
             case CURRENT:
-                bookings = repository.findByBookerIdAndStartIsBeforeAndEndIsAfterOrderByStartDesc(userId, now, now);
+                bookings = bookingRepository.findByBookerIdAndStartIsBeforeAndEndIsAfterOrderByStartDesc(userId, now, now);
                 break;
             case WAITING:
-                bookings = repository.findByBookerIdAndStatusOrderByStartDesc(userId, Status.WAITING);
+                bookings = bookingRepository.findByBookerIdAndStatusOrderByStartDesc(userId, Status.WAITING);
                 break;
             case REJECTED:
-                bookings = repository.findByBookerIdAndStatusOrderByStartDesc(userId, Status.REJECTED);
+                bookings = bookingRepository.findByBookerIdAndStatusOrderByStartDesc(userId, Status.REJECTED);
                 break;
             case UNKNOWN:
-                log.warn(UNKNOWN_STATUS_MESSAGE);
-                throw new UnsupportedStatusException(UNKNOWN_STATUS_MESSAGE);
+                log.warn("Unknown state: UNSUPPORTED_STATUS");
+                throw new UnsupportedStatusException("Unknown state: UNSUPPORTED_STATUS");
         }
         return bookings.stream().map(BookingMapper::toBookingDtoOut).collect(Collectors.toList());
     }
 
     @Override
     public List<BookingOutDto> findByOwnerItemsAndState(Long userId, State state) {
-        checkUser(userId);
+        trowIfNotExist(userId);
         List<Item> items = itemRepository.findByOwnerId(userId);
         if (items.isEmpty()) {
             return Collections.emptyList();
@@ -105,26 +93,26 @@ public class BookingServiceImpl implements BookingService {
 
         switch (state) {
             case ALL:
-                bookings = repository.findByItemIdInOrderByStartDesc(itemIds);
+                bookings = bookingRepository.findByItemIdInOrderByStartDesc(itemIds);
                 break;
             case PAST:
-                bookings = repository.findByItemIdInAndEndIsBeforeOrderByStartDesc(itemIds, now);
+                bookings = bookingRepository.findByItemIdInAndEndIsBeforeOrderByStartDesc(itemIds, now);
                 break;
             case FUTURE:
-                bookings = repository.findByItemIdInAndStartIsAfterOrderByStartDesc(itemIds, now);
+                bookings = bookingRepository.findByItemIdInAndStartIsAfterOrderByStartDesc(itemIds, now);
                 break;
             case CURRENT:
-                bookings = repository.findByItemIdInAndStartIsBeforeAndEndIsAfterOrderByStartDesc(itemIds, now, now);
+                bookings = bookingRepository.findByItemIdInAndStartIsBeforeAndEndIsAfterOrderByStartDesc(itemIds, now, now);
                 break;
             case WAITING:
-                bookings = repository.findByItemIdInAndStatusOrderByStartDesc(itemIds, Status.WAITING);
+                bookings = bookingRepository.findByItemIdInAndStatusOrderByStartDesc(itemIds, Status.WAITING);
                 break;
             case REJECTED:
-                bookings = repository.findByItemIdInAndStatusOrderByStartDesc(itemIds, Status.REJECTED);
+                bookings = bookingRepository.findByItemIdInAndStatusOrderByStartDesc(itemIds, Status.REJECTED);
                 break;
             default:
-                log.warn(UNKNOWN_STATUS_MESSAGE);
-                throw new UnsupportedStatusException(UNKNOWN_STATUS_MESSAGE);
+                log.warn("Unknown state: UNSUPPORTED_STATUS");
+                throw new UnsupportedStatusException("Unknown state: UNSUPPORTED_STATUS");
         }
         return bookings.stream().map(BookingMapper::toBookingDtoOut).collect(Collectors.toList());
     }
@@ -132,27 +120,27 @@ public class BookingServiceImpl implements BookingService {
     @Transactional
     @Override
     public BookingOutDto add(Long userId, BookingInDto bookingDto) {
-        User booker = checkUser(userId);
+        User booker = trowIfNotExist(userId);
         long itemId = bookingDto.getItemId();
         Item item = checkItem(itemId);
         if (isOwner(userId, itemId)) {
-            log.warn(USER_IS_OWNER_MESSAGE, userId, item.getId());
-            throw new OwnerBookingException(String.format(
-                    USER_IS_OWNER_MESSAGE, userId, item.getId()));
+            log.warn("Пользователь с id {} владелец вещи с id {}", userId, item.getId());
+            throw new NotFoundException(String.format(
+                    "Пользователь с id %d владелец вещи с id %d", userId, item.getId()));
         }
         if (!item.isAvailable()) {
-            log.warn(ITEM_NOT_AVAILABLE_MESSAGE, item.getId());
+            log.warn("Вещь с id {} недоступна для бронирования", item.getId());
             throw new ValidationException(String.format(
-                    ITEM_NOT_AVAILABLE_MESSAGE, item.getId()));
+                    "Вещь с id %d  недоступна для бронирования", item.getId()));
         }
         if (!bookingDto.getEnd().isAfter(bookingDto.getStart())) {
-            log.warn(END_DATE_AFTER_START_DATE_ERROR_MESSAGE);
-            throw new ValidationException(END_DATE_AFTER_START_DATE_ERROR_MESSAGE);
+            log.warn("Дата окончания бронирования должна быть после даты начала");
+            throw new ValidationException("Дата окончания бронирования должна быть после даты начала");
         }
         Booking booking = BookingMapper.toBooking(bookingDto);
         booking.setBooker(booker);
         booking.setStatus(Status.WAITING);
-        booking = repository.save(booking);
+        booking = bookingRepository.save(booking);
         booking.setItem(item);
         return BookingMapper.toBookingDtoOut(booking);
     }
@@ -160,41 +148,41 @@ public class BookingServiceImpl implements BookingService {
     @Transactional
     @Override
     public BookingOutDto patch(Long userId, long bookingId, boolean approved) {
-        checkUser(userId);
-        Booking booking = repository.findById(bookingId)
-                .orElseThrow(() -> new NotFoundException(String.format(BOOKING_NOT_FOUND_MESSAGE, bookingId)));
+        trowIfNotExist(userId);
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new NotFoundException(String.format("Бронирование с id %d не найдено", bookingId)));
         long itemId = booking.getItem().getId();
         if (!isOwner(userId, itemId)) {
-            log.warn(USER_IS_NOT_OWNER_MESSAGE, userId, itemId);
-            throw new NotFoundException(String.format(USER_IS_OWNER_MESSAGE, userId, itemId));
+            log.warn("Пользователь с id {} не владеет вещью с id {}", userId, itemId);
+            throw new NotFoundException(String.format("Пользователь с id %d не владеет вещью с id %d", userId, itemId));
         }
         Status status;
         if (approved) {
             if (booking.getStatus().equals(Status.APPROVED)) {
-                log.warn(BOOKING_ALREADY_APPROVED_MESSAGE, bookingId);
-                throw new ValidationException(String.format(BOOKING_ALREADY_APPROVED_MESSAGE, bookingId));
+                log.warn("Бронирование с id {} уже подтверждено", bookingId);
+                throw new ValidationException(String.format("Бронирование с id %d уже подтверждено", bookingId));
             }
             status = Status.APPROVED;
         } else {
             if (booking.getStatus().equals(Status.REJECTED)) {
-                log.warn(BOOKING_ALREADY_REJECTED_MESSAGE, bookingId);
-                throw new ValidationException(String.format(BOOKING_ALREADY_REJECTED_MESSAGE, bookingId));
+                log.warn("Бронирование с id {} уже отклонено", bookingId);
+                throw new ValidationException(String.format("Бронирование с id %d уже отклонено", bookingId));
             }
             status = Status.REJECTED;
         }
         booking.setStatus(status);
-        booking = repository.save(booking);
+        booking = bookingRepository.save(booking);
         return BookingMapper.toBookingDtoOut(booking);
     }
 
-    private User checkUser(Long userId) {
+    private User trowIfNotExist(Long userId) {
         return userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException(String.format(USER_NOT_FOUND_MESSAGE, userId)));
+                .orElseThrow(() -> new NotFoundException(String.format("Пользователь с id %d не найден", userId)));
     }
 
     private Item checkItem(Long itemId) {
         return itemRepository.findById(itemId)
-                .orElseThrow(() -> new NotFoundException(String.format(ITEM_NOT_FOUND_MESSAGE, itemId)));
+                .orElseThrow(() -> new NotFoundException(String.format("Вещь с id %d не найдена", itemId)));
     }
 
     private boolean isOwner(long userId, long itemId) {

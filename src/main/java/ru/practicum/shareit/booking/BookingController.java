@@ -1,6 +1,5 @@
 package ru.practicum.shareit.booking;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -13,6 +12,7 @@ import ru.practicum.shareit.booking.dto.BookingInDto;
 import ru.practicum.shareit.booking.dto.BookingOutDto;
 import ru.practicum.shareit.booking.enums.State;
 import ru.practicum.shareit.booking.service.BookingService;
+import ru.practicum.shareit.exception.UnsupportedStatusException;
 import ru.practicum.shareit.validation.ValidationType.Create;
 import ru.practicum.shareit.validation.ValidationType.Update;
 
@@ -41,18 +41,24 @@ public class BookingController {
 
     @GetMapping
     public List<BookingOutDto> findByState(@RequestHeader(userIdHeader) Long userId,
-                                           @RequestParam(defaultValue = "ALL") String state) throws JsonProcessingException {
-        State stateEnum = mapper.readValue(mapper.writeValueAsString(state), State.class);
-        return bookingService.findByState(userId, stateEnum);
+                                           @RequestParam(defaultValue = "ALL") State state) {
+        if (state == State.UNSUPPORTED_STATUS) {//так работает, но как то не изящно получается
+            throw new UnsupportedStatusException("Unknown state: UNSUPPORTED_STATUS");
+        }
+
+        return bookingService.findByState(userId, state);
     }
 
     @GetMapping("/owner")
     public List<BookingOutDto> findByOwnerItemsAndState(@RequestHeader(userIdHeader) Long userId,
-                                                        @RequestParam(defaultValue = "ALL") String state
-    ) throws JsonProcessingException {
-        State stateEnum = mapper.readValue(mapper.writeValueAsString(state), State.class);
-        return bookingService.findByOwnerItemsAndState(userId, stateEnum);
+                                                        @RequestParam(defaultValue = "ALL") State state) {
+        if (state == State.UNSUPPORTED_STATUS) {
+            throw new UnsupportedStatusException("Unknown state: UNSUPPORTED_STATUS");
+        }
+
+        return bookingService.findByOwnerItemsAndState(userId, state);
     }
+
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
