@@ -1,6 +1,5 @@
 package ru.practicum.shareit.booking.enums;
 
-import com.fasterxml.jackson.annotation.JsonEnumDefaultValue;
 
 public enum State {
     ALL,
@@ -9,7 +8,6 @@ public enum State {
     FUTURE,
     WAITING,
     REJECTED,
-    UNSUPPORTED_STATUS, @JsonEnumDefaultValue
-    UNKNOWN
+    UNSUPPORTED_STATUS
 }
 

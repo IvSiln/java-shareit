@@ -1,9 +1,5 @@
 package ru.practicum.shareit.booking;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.MapperFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.json.JsonMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
@@ -26,12 +22,6 @@ import java.util.List;
 public class BookingController {
     private final BookingService bookingService;
     private final String userIdHeader = "X-Sharer-User-Id";
-
-    private final ObjectMapper mapper = JsonMapper.builder()
-            .configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true)
-            .configure(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_USING_DEFAULT_VALUE, true)
-            .build();
-
 
     @GetMapping("{bookingId}")
     public BookingOutDto findById(@RequestHeader(userIdHeader) Long userId,

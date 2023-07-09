@@ -38,7 +38,8 @@ public class ErrorHandler {
         return new ErrorResponse(e.getMessage());
     }
 
-    @ExceptionHandler({ValidationException.class, UnsupportedStatusException.class, MethodArgumentNotValidException.class, MissingRequestHeaderException.class})
+    @ExceptionHandler({ValidationException.class, UnsupportedStatusException.class,
+            MethodArgumentNotValidException.class, MissingRequestHeaderException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleValidationExceptions(final Exception e) throws JsonProcessingException {
         if (e instanceof MethodArgumentNotValidException) {

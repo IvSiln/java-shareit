@@ -73,7 +73,7 @@ public class BookingServiceImpl implements BookingService {
             case REJECTED:
                 bookings = bookingRepository.findByBookerIdAndStatusOrderByStartDesc(userId, Status.REJECTED);
                 break;
-            case UNKNOWN:
+            default:
                 log.warn("Unknown state: UNSUPPORTED_STATUS");
                 throw new UnsupportedStatusException("Unknown state: UNSUPPORTED_STATUS");
         }
@@ -82,15 +82,19 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public List<BookingOutDto> findByOwnerItemsAndState(Long userId, State state) {
+
         trowIfNotExist(userId);
+
         List<Item> items = itemRepository.findByOwnerId(userId);
-        if (items.isEmpty()) {
+
+        List<Long> itemIds = itemRepository.findByOwnerId(userId).stream()
+                .map(Item::getId)
+                .collect(Collectors.toList());
+        if (itemIds.isEmpty()) {
             return Collections.emptyList();
         }
-        List<Long> itemIds = items.stream().map(Item::getId).collect(Collectors.toList());
         List<Booking> bookings;
         Instant now = Instant.now();
-
         switch (state) {
             case ALL:
                 bookings = bookingRepository.findByItemIdInOrderByStartDesc(itemIds);
