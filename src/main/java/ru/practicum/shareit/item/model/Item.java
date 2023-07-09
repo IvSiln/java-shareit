@@ -1,34 +1,51 @@
 package ru.practicum.shareit.item.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 import ru.practicum.shareit.request.ItemRequest;
 import ru.practicum.shareit.user.model.User;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
+import javax.persistence.*;
 
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
+@Entity
+@Table(name = "items")
+@Getter
+@Setter
+@ToString
 public class Item {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @NotBlank
+
+    @Column(name = "name", nullable = false)
     private String name;
-    @NotBlank
+
+    @Column(name = "description", nullable = false)
     private String description;
-    @NotNull
-    private Boolean available;
+
+    @Column(name = "available", nullable = false)
+    private boolean available;
+
+    @ManyToOne
+    @ToString.Exclude
+    @JoinColumn(name = "owner_id")
     private User owner;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @ToString.Exclude
+    @JoinColumn(name = "request_id")
     private ItemRequest request;
 
-    public Item(Item newItem) {
-        this.setId(newItem.getId());
-        this.setName(newItem.getName());
-        this.setDescription(newItem.getDescription());
-        this.setAvailable(newItem.getAvailable());
-        this.setOwner(newItem.getOwner());
-        this.setRequest(newItem.getRequest());
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Item)) return false;
+        return id != null && id.equals(((Item) o).getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
     }
 }
