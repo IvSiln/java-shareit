@@ -1,4 +1,4 @@
-package ru.practicum.shareit.request;
+package ru.practicum.shareit.requests.model;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -21,11 +21,12 @@ public class ItemRequest {
     @Column(name = "description")
     private String description;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @ToString.Exclude
-    @JoinColumn(name = "requester_id")
-    private User requester;
+    @JoinColumn(name = "requestor_id")
+    private User requestor;
 
+    @Column(name = "created")
     @CreationTimestamp
-    private Instant created;
+    Instant created;
 }
