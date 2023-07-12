@@ -14,19 +14,17 @@ import java.util.List;
 
 @Repository
 public interface ItemRepository extends JpaRepository<Item, Long>, CrudRepository<Item, Long>,
-   PagingAndSortingRepository<Item, Long>
+        PagingAndSortingRepository<Item, Long> {
 
-    {
+    Page<Item> findByOwnerId(long userId, Pageable page);
 
-        Page<Item> findByOwnerId(long userId, Pageable page);
+    @Query(" SELECT i FROM Item i " +
+            "WHERE (lower(i.name) LIKE concat('%', :text, '%') " +
+            " OR lower(i.description) LIKE concat('%', :text, '%')) " +
+            " AND i.available = true")
+    Page<Item> searchWithPaging(@Param("text") String text, org.springframework.data.domain.Pageable page);
 
-        @Query(" select i from Item i " +
-                "where (lower(i.name) like concat('%', :text, '%') " +
-                " or lower(i.description) like concat('%', :text, '%')) " +
-                " and i.available = true")
-        Page<Item> searchWithPaging(@Param("text") String text, org.springframework.data.domain.Pageable page);
+    List<Item> findByRequestId(long requestId);
 
-        List<Item> findByRequestId(long requestId);
-
-        List<Item> findByRequestIdIn(List<Long> requestIds);
-    }
+    List<Item> findByRequestIdIn(List<Long> requestIds);
+}

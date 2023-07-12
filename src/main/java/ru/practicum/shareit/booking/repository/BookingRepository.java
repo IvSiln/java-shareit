@@ -18,15 +18,15 @@ import java.util.List;
 public interface BookingRepository extends JpaRepository<Booking, Long>, CrudRepository<Booking, Long>,
         PagingAndSortingRepository<Booking, Long> {
 
-    List<Booking> findByItemIdAndStatusOrStatusOrderByStartAsc(Long id, Status status, Status status1);
+    List<Booking> findByItemIdAndStatusOrStatusOrderByStartAsc(Long id, Status first, Status second);
 
-    List<Booking> findByItemIdInAndStatusOrStatusOrderByStartAsc(List<Long> itemIds, Status status, Status status1);
+    List<Booking> findByItemIdInAndStatusOrStatusOrderByStartAsc(List<Long> itemIds, Status first, Status second);
 
-    @Query("select b from Booking b where (b.item.id = :itemId) and " +
-            "(b.status = :status) and " +
-            "(b.start between :start and :end " +
-            "OR b.end between :start and :end " +
-            "OR b.start <= :start AND b.end >= :end)")
+    @Query("SELECT b FROM Booking b WHERE b.item.id = :itemId AND " +
+            "b.status = :status AND " +
+            "(b.start BETWEEN :start AND :end OR " +
+            "b.end BETWEEN :start AND :end OR " +
+            "b.start <= :start AND b.end >= :end)")
     List<Booking> findBookingsAtSameTime(@Param(value = "itemId") long itemId,
                                          @Param(value = "status") Status status,
                                          @Param(value = "start") Instant start,

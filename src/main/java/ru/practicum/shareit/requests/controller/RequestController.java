@@ -39,10 +39,9 @@ public class RequestController {
     @GetMapping("/all")
     public List<ItemRequestDto> findAll(
             @RequestHeader("X-Sharer-User-Id") Long userId,
-            @RequestParam(defaultValue = "0") @Min(value = 0,
-                    message = "Индекс первого элемента не может быть отрицательным") int from,
+            @RequestParam(defaultValue = "0") @Min(value = 0) int from,
             @RequestParam(defaultValue = "10")
-            @Positive(message = "Количество элементов для отображения должно быть положительным") int size) {
+            @Positive int size) {
         return service.findAll(userId, from, size);
     }
 

@@ -11,10 +11,10 @@ import java.util.List;
 @Data
 @Builder
 public class ItemRequestDto {
+    private final List<ItemDto> items = new ArrayList<>();
     long id;
     private String description;
     private LocalDateTime created;
-    private final List<ItemDto> items = new ArrayList<>();
 
     public void addAllItems(List<ItemDto> itemsToAdd) {
         items.addAll(itemsToAdd);

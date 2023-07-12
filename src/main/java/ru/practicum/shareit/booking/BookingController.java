@@ -1,6 +1,5 @@
 package ru.practicum.shareit.booking;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
@@ -9,6 +8,7 @@ import ru.practicum.shareit.booking.dto.BookingInDto;
 import ru.practicum.shareit.booking.dto.BookingOutDto;
 import ru.practicum.shareit.booking.enums.State;
 import ru.practicum.shareit.booking.service.BookingService;
+import ru.practicum.shareit.exception.UnsupportedStatusException;
 import ru.practicum.shareit.validation.ValidationType;
 
 import javax.validation.Valid;
@@ -22,7 +22,6 @@ import java.util.List;
 @Validated
 public class BookingController {
     private final BookingService service;
-    private final ObjectMapper mapper;
 
     @GetMapping("{bookingId}")
     public BookingOutDto findById(@RequestHeader("X-Sharer-User-Id") Long userId,
@@ -32,26 +31,25 @@ public class BookingController {
 
     @GetMapping
     public List<BookingOutDto> findByState(@RequestHeader("X-Sharer-User-Id") Long userId,
-                                           @RequestParam(defaultValue = "ALL") String state,
-                                           @RequestParam(defaultValue = "0") @Min(value = 0,
-                                                   message = "Индекс первого элемента не может быть отрицательным") int from,
-                                           @RequestParam(defaultValue = "10") @Positive(
-                                                   message = "Количество элементов для отображения должно быть положительным") int size) {
-        State stateEnum = mapper.convertValue(state.toUpperCase(), State.class);
-        return service.findByState(userId, stateEnum, from, size);
+                                           @RequestParam(defaultValue = "ALL") State state,
+                                           @RequestParam(defaultValue = "0") @Min(value = 0) int from,
+                                           @RequestParam(defaultValue = "10") @Positive int size) {
+        if (state == State.UNSUPPORTED_STATUS) {
+            throw new UnsupportedStatusException("Unknown state: UNSUPPORTED_STATUS");
+        }
+        return service.findByState(userId, state, from, size);
     }
 
     @GetMapping("/owner")
     public List<BookingOutDto> findByOwnerItemsAndState(@RequestHeader("X-Sharer-User-Id") Long userId,
-                                                        @RequestParam(defaultValue = "ALL") String state,
+                                                        @RequestParam(defaultValue = "ALL") State state,
                                                         @RequestParam(defaultValue = "0")
-                                                        @Min(value = 0,
-                                                                message = "Индекс первого элемента не может быть отрицательным")
-                                                        int from,
-                                                        @RequestParam(defaultValue = "10") @Positive(
-                                                                message = "Количество элементов для отображения должно быть положительным") int size) {
-        State stateEnum = mapper.convertValue(state.toUpperCase(), State.class);
-        return service.findByOwnerItemsAndState(userId, stateEnum, from, size);
+                                                        @Min(value = 0) int from,
+                                                        @RequestParam(defaultValue = "10") @Positive int size) {
+        if (state == State.UNSUPPORTED_STATUS) {
+            throw new UnsupportedStatusException("Unknown state: UNSUPPORTED_STATUS");
+        }
+        return service.findByOwnerItemsAndState(userId, state, from, size);
     }
 
     @PostMapping

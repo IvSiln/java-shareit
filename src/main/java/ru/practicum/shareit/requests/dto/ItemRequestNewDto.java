@@ -11,8 +11,8 @@ import java.time.LocalDateTime;
 @Builder
 public class ItemRequestNewDto {
     long id;
-    @NotBlank(message = "Описание не может быть пустым")
-    @Size(max = 200, message = "Длина описания должна до 200 символов")
+    @NotBlank
+    @Size(max = 200)
     private String description;
     private LocalDateTime created;
 }

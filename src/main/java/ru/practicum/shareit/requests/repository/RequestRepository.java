@@ -11,11 +11,11 @@ import ru.practicum.shareit.requests.model.ItemRequest;
 import java.util.List;
 
 @Repository
-public interface ItemRequestRepository extends JpaRepository<ItemRequest, Long>,
+public interface RequestRepository extends JpaRepository<ItemRequest, Long>,
         CrudRepository<ItemRequest, Long>,
         PagingAndSortingRepository<ItemRequest, Long> {
-    List<ItemRequest> findByRequestorId(long requestorId);
+    List<ItemRequest> findByRequesterId(long requesterId);
 
-    Page<ItemRequest> findByRequestorIdNot(long requestorId, Pageable page);
+    Page<ItemRequest> findByRequesterIdNot(long requesterId, Pageable page);
 }
 
