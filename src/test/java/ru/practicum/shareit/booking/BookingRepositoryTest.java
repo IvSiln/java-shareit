@@ -51,8 +51,8 @@ class BookingRepositoryTest {
         booker = userRepository.save(booker);
 
         item = new Item();
-        item.setName("Набор отверток");
-        item.setDescription("Большой набор отверток");
+        item.setName("Лошадь");
+        item.setDescription("Это не дура, это лошадь");
         item.setAvailable(true);
         item.setOwner(owner);
         item = itemRepository.save(item);
@@ -77,12 +77,12 @@ class BookingRepositoryTest {
         Instant start = booking.getEnd().plusSeconds(5);
         Instant end = booking.getEnd().plusSeconds(25);
         Status status = Status.APPROVED;
-        TypedQuery<Booking> query = entityManager.getEntityManager()
-                .createQuery("select b from Booking b where (b.item.id = :itemId) and " +
-                        "(b.status = :status) and " +
-                        "(b.start between :start and :end " +
-                        "OR b.end between :start and :end " +
-                        "OR b.start <= :start AND b.end >= :end)", Booking.class);
+        TypedQuery<Booking> query = entityManager.getEntityManager().createQuery("SELECT b FROM Booking b " +
+                "WHERE (b.item.id = :itemId) AND " +
+                "(b.status = :status) AND " +
+                "((b.start BETWEEN :start AND :end) OR " +
+                "(b.end BETWEEN :start AND :end) OR " +
+                "(b.start <= :start AND b.end >= :end))", Booking.class);
         List<Booking> bookings = query
                 .setParameter("itemId", item.getId())
                 .setParameter("status", status)
