@@ -34,9 +34,6 @@ public class BookingController {
                                            @RequestParam(defaultValue = "ALL") State state,
                                            @RequestParam(defaultValue = "0") @Min(value = 0) int from,
                                            @RequestParam(defaultValue = "10") @Positive int size) {
-        if (state == State.UNSUPPORTED_STATUS) {
-            throw new UnsupportedStatusException("Unknown state: UNSUPPORTED_STATUS");
-        }
         return service.findByState(userId, state, from, size);
     }
 
@@ -46,9 +43,6 @@ public class BookingController {
                                                         @RequestParam(defaultValue = "0")
                                                         @Min(value = 0) int from,
                                                         @RequestParam(defaultValue = "10") @Positive int size) {
-        if (state == State.UNSUPPORTED_STATUS) {
-            throw new UnsupportedStatusException("Unknown state: UNSUPPORTED_STATUS");
-        }
         return service.findByOwnerItemsAndState(userId, state, from, size);
     }
 
