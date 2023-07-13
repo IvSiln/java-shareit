@@ -11,6 +11,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import ru.practicum.shareit.booking.BookingController;
 import ru.practicum.shareit.booking.dto.BookingInDto;
 import ru.practicum.shareit.booking.dto.BookingOutDto;
+import ru.practicum.shareit.booking.enums.State;
 import ru.practicum.shareit.booking.enums.Status;
 import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.exception.NotFoundException;
@@ -19,6 +20,7 @@ import ru.practicum.shareit.user.dto.UserDto;
 
 import javax.validation.ValidationException;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -228,4 +230,95 @@ class BookingControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error", containsString(error), String.class));
     }
+    @Test
+    void shouldFindByState() throws Exception {
+        LocalDateTime now = LocalDateTime.now();
+        BookingOutDto booking1 = builderOut.id(1L).start(now.minusDays(1)).end(now).status(Status.APPROVED).build();
+        BookingOutDto booking2 = builderOut.id(2L).start(now.plusDays(1)).end(now.plusDays(2)).status(Status.WAITING).build();
+        BookingOutDto booking3 = builderOut.id(3L).start(now.plusDays(2)).end(now.plusDays(3)).status(Status.REJECTED).build();
+
+        when(bookingService.findByState(1L, State.CURRENT, 0, 10)).thenReturn(List.of(booking1));
+        mockMvc.perform(get(URL)
+                        .header(HEADER, 1)
+                        .param("state", "CURRENT")
+                        .param("from", "0")
+                        .param("size", "10"))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id", is(booking1.getId()), Long.class))
+                .andExpect(jsonPath("$[0].start",
+                        containsString(String.valueOf(booking1.getStart().getSecond())), String.class))
+                .andExpect(jsonPath("$[0].status", is(booking1.getStatus().toString()), String.class));
+
+        when(bookingService.findByState(1L, State.PAST, 0, 10)).thenReturn(List.of());
+        mockMvc.perform(get(URL)
+                        .header(HEADER, 1)
+                        .param("state", "PAST")
+                        .param("from", "0")
+                        .param("size", "10"))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(0)));
+
+        when(bookingService.findByState(1L, State.FUTURE, 0, 10)).thenReturn(List.of(booking2, booking3));
+        mockMvc.perform(get(URL)
+                        .header(HEADER, 1)
+                        .param("state", "FUTURE")
+                        .param("from", "0")
+                        .param("size", "10"))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id", is(booking2.getId()), Long.class))
+                .andExpect(jsonPath("$[0].start",
+                        containsString(String.valueOf(booking2.getStart().getSecond())), String.class))
+                .andExpect(jsonPath("$[0].status", is(booking2.getStatus().toString()), String.class))
+                .andExpect(jsonPath("$[1].id", is(booking3.getId()), Long.class))
+                .andExpect(jsonPath("$[1].start",
+                        containsString(String.valueOf(booking3.getStart().getSecond())), String.class))
+                .andExpect(jsonPath("$[1].status", is(booking3.getStatus().toString()), String.class));
+    }
+
+    @Test
+    void shouldFindByOwnerItemsAndState() throws Exception {
+        LocalDateTime now = LocalDateTime.now();
+        BookingOutDto booking1 = builderOut.id(1L).start(now.minusDays(1)).end(now).status(Status.APPROVED).build();
+        BookingOutDto booking2 = builderOut.id(2L).start(now.plusDays(1)).end(now.plusDays(2)).status(Status.WAITING).build();
+
+        when(bookingService.findByOwnerItemsAndState(1L, State.CURRENT, 0, 10)).thenReturn(List.of(booking1));
+        mockMvc.perform(get(URL + "/owner-items")
+                        .header(HEADER, 1)
+                        .param("state", "CURRENT")
+                        .param("from", "0")
+                        .param("size", "10"))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id", is(booking1.getId()), Long.class))
+                .andExpect(jsonPath("$[0].start",
+                        containsString(String.valueOf(booking1.getStart().getSecond())), String.class))
+                .andExpect(jsonPath("$[0].status", is(booking1.getStatus().toString()), String.class));
+
+        when(bookingService.findByOwnerItemsAndState(1L, State.PAST, 0, 10)).thenReturn(List.of());
+        mockMvc.perform(get(URL + "/owner-items")
+                        .header(HEADER, 1)
+                        .param("state", "PAST")
+                        .param("from", "0")
+                        .param("size", "10"))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(0)));
+
+        when(bookingService.findByOwnerItemsAndState(1L, State.FUTURE, 0, 10)).thenReturn(List.of(booking2));
+        mockMvc.perform(get(URL + "/owner-items")
+                        .header(HEADER, 1)
+                        .param("state", "FUTURE")
+                        .param("from", "0")
+                        .param("size", "10"))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id", is(booking2.getId()), Long.class))
+                .andExpect(jsonPath("$[0].start",
+                        containsString(String.valueOf(booking2.getStart().getSecond())), String.class))
+                .andExpect(jsonPath("$[0].status", is(booking2.getStatus().toString()), String.class));
+    }
+
 }
