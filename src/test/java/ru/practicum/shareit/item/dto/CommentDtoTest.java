@@ -34,7 +34,7 @@ class CommentDtoTest {
         CommentDto commentDto = new CommentDto(id, text, authorName, created);
         JsonContent<CommentDto> result = json.write(commentDto);
         String originalString = created.toString();
-        String shortenedString = originalString.substring(0, originalString.length() - 2);
+        String shortenedString = originalString.substring(0, originalString.length() - 4);
         assertThat(result).extractingJsonPathStringValue("$.authorName").isEqualTo(authorName);
         assertThat(result).extractingJsonPathStringValue("$.text").isEqualTo(text);
         assertThat(result).extractingJsonPathStringValue("$.created").isEqualTo(shortenedString);
