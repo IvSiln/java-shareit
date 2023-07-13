@@ -11,8 +11,12 @@ import java.time.LocalDateTime;
 @Builder
 public class ItemRequestNewDto {
     long id;
+
     @NotBlank
-    @Size(max = 200)
+    @Size(max = 200, message = "Description must not exceed {max} characters")
     private String description;
+
     private LocalDateTime created;
 }
+
+
