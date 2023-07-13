@@ -12,9 +12,19 @@ import java.util.List;
 @Builder
 public class ItemRequestDto {
     private final List<ItemDto> items = new ArrayList<>();
-    long id;
+    private long id;
     private String description;
     private LocalDateTime created;
+
+    public ItemRequestDto() {
+        // Default constructor
+    }
+
+    public ItemRequestDto(long id, String description, LocalDateTime created) {
+        this.id = id;
+        this.description = description;
+        this.created = created;
+    }
 
     public void addAllItems(List<ItemDto> itemsToAdd) {
         items.addAll(itemsToAdd);
