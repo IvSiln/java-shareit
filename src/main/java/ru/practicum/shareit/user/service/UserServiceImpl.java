@@ -1,8 +1,6 @@
 package ru.practicum.shareit.user.service;
 
-import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exception.NotFoundException;
@@ -17,10 +15,12 @@ import java.util.List;
 @Service
 @Transactional
 @Slf4j
-@AllArgsConstructor
 public class UserServiceImpl implements UserService {
-    @Autowired
     private final UserRepository repository;
+
+    public UserServiceImpl(UserRepository repository) {
+        this.repository = repository;
+    }
 
     @Override
     public List<UserDto> findAll() {

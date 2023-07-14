@@ -1,4 +1,4 @@
-package ru.practicum.shareit.request;
+package ru.practicum.shareit.requests.model;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -14,18 +14,16 @@ import java.time.Instant;
 @Entity
 @Table(name = "requests")
 public class ItemRequest {
+    @Column(name = "created")
+    @CreationTimestamp
+    Instant created;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     @Column(name = "description")
     private String description;
-
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @ToString.Exclude
     @JoinColumn(name = "requester_id")
     private User requester;
-
-    @CreationTimestamp
-    private Instant created;
 }

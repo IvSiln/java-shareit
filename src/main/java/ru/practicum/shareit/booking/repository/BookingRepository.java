@@ -1,8 +1,12 @@
 package ru.practicum.shareit.booking.repository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.booking.enums.Status;
 import ru.practicum.shareit.booking.model.Booking;
@@ -13,29 +17,40 @@ import java.util.List;
 @Repository
 public interface BookingRepository extends JpaRepository<Booking, Long>, CrudRepository<Booking, Long>,
         PagingAndSortingRepository<Booking, Long> {
-    List<Booking> findByBookerIdOrderByStartDesc(Long bookerId);
 
-    List<Booking> findByBookerIdAndEndIsBeforeOrderByStartDesc(Long bookerId, Instant end);
+    List<Booking> findByItemIdAndStatusOrStatusOrderByStartAsc(Long id, Status first, Status second);
 
-    List<Booking> findByBookerIdAndStartIsAfterOrderByStartDesc(Long userId, Instant now);
+    List<Booking> findByItemIdInAndStatusOrStatusOrderByStartAsc(List<Long> itemIds, Status first, Status second);
 
-    List<Booking> findByBookerIdAndStartIsBeforeAndEndIsAfterOrderByStartDesc(Long userId, Instant now, Instant now1);
+    @Query("SELECT b FROM Booking b WHERE b.item.id = :itemId AND " +
+            "b.status = :status AND " +
+            "(b.start BETWEEN :start AND :end OR " +
+            "b.end BETWEEN :start AND :end OR " +
+            "b.start <= :start AND b.end >= :end)")
+    List<Booking> findBookingsAtSameTime(@Param(value = "itemId") long itemId,
+                                         @Param(value = "status") Status status,
+                                         @Param(value = "start") Instant start,
+                                         @Param(value = "end") Instant end);
 
-    List<Booking> findByBookerIdAndStatusOrderByStartDesc(Long userId, Status status);
+    List<Booking> findByBookerIdAndItemIdAndStatusAndStartIsBefore(Long userId, long itemId, Status status, Instant now);
 
-    List<Booking> findByItemIdInOrderByStartDesc(List<Long> itemIds);
+    Page<Booking> findByItemOwnerId(Long userId, Pageable page);
 
-    List<Booking> findByItemIdInAndEndIsBeforeOrderByStartDesc(List<Long> itemIds, Instant now);
+    Page<Booking> findByItemOwnerIdAndEndIsBefore(Long userId, Instant now, Pageable page);
 
-    List<Booking> findByItemIdInAndStartIsAfterOrderByStartDesc(List<Long> itemIds, Instant now);
+    Page<Booking> findByItemOwnerIdAndStartIsAfter(Long userId, Instant now, Pageable page);
 
-    List<Booking> findByItemIdInAndStartIsBeforeAndEndIsAfterOrderByStartDesc(List<Long> itemIds, Instant now, Instant now1);
+    Page<Booking> findByItemOwnerIdAndStartIsBeforeAndEndIsAfter(Long userId, Instant now, Instant now1, Pageable page);
 
-    List<Booking> findByItemIdInAndStatusOrderByStartDesc(List<Long> itemIds, Status status);
+    Page<Booking> findByItemOwnerIdAndStatus(Long userId, Status status, Pageable page);
 
-    List<Booking> findByItemIdAndStatusOrStatusOrderByStartAsc(Long id, Status status, Status status1);
+    Page<Booking> findByBookerId(Long userId, Pageable page);
 
-    List<Booking> findByItemIdInAndStatusOrStatusOrderByStartAsc(List<Long> itemIds, Status status, Status status1);
+    Page<Booking> findByBookerIdAndEndIsBefore(Long userId, Instant now, Pageable page);
 
-    List<Booking> findByBookerIdAndStatusOrderByStart(Long userId, Status status);
+    Page<Booking> findByBookerIdAndStartIsAfter(Long userId, Instant now, Pageable page);
+
+    Page<Booking> findByBookerIdAndStartIsBeforeAndEndIsAfter(Long userId, Instant now, Instant now1, Pageable page);
+
+    Page<Booking> findByBookerIdAndStatus(Long userId, Status status, Pageable page);
 }
