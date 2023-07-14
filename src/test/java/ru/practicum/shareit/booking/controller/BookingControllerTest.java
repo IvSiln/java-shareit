@@ -285,7 +285,7 @@ class BookingControllerTest {
         BookingOutDto booking2 = builderOut.id(2L).start(now.plusDays(1)).end(now.plusDays(2)).status(Status.WAITING).build();
 
         when(bookingService.findByOwnerItemsAndState(1L, State.CURRENT, 0, 10)).thenReturn(List.of(booking1));
-        mockMvc.perform(get(URL + "/owner-items")
+        mockMvc.perform(get(URL + "/owner")
                         .header(HEADER, 1)
                         .param("state", "CURRENT")
                         .param("from", "0")
@@ -298,7 +298,7 @@ class BookingControllerTest {
                 .andExpect(jsonPath("$[0].status", is(booking1.getStatus().toString()), String.class));
 
         when(bookingService.findByOwnerItemsAndState(1L, State.PAST, 0, 10)).thenReturn(List.of());
-        mockMvc.perform(get(URL + "/owner-items")
+        mockMvc.perform(get(URL + "/owner")
                         .header(HEADER, 1)
                         .param("state", "PAST")
                         .param("from", "0")
@@ -308,7 +308,7 @@ class BookingControllerTest {
                 .andExpect(jsonPath("$", hasSize(0)));
 
         when(bookingService.findByOwnerItemsAndState(1L, State.FUTURE, 0, 10)).thenReturn(List.of(booking2));
-        mockMvc.perform(get(URL + "/owner-items")
+        mockMvc.perform(get(URL + "/owner")
                         .header(HEADER, 1)
                         .param("state", "FUTURE")
                         .param("from", "0")
