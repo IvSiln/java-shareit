@@ -13,6 +13,7 @@ import org.springframework.data.domain.Sort;
 import ru.practicum.shareit.booking.enums.Status;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.repository.BookingRepository;
+import ru.practicum.shareit.exception.BadRequestException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemBookingCommentsDto;
@@ -107,9 +108,9 @@ class ItemServiceTest {
         PageRequest page = PageRequest.of(from / size, size);
         when(userRepository.findById(userId)).thenReturn(Optional.of(booker));
         when(itemRepository.findByOwnerId(userId, page)).thenReturn(Page.empty());
-        List<ItemBookingCommentsDto> itemDtos = itemService.findAllByUserId(userId, from, size);
-        assertNotNull(itemDtos);
-        assertEquals(0, itemDtos.size());
+        List<ItemBookingCommentsDto> itemDto = itemService.findAllByUserId(userId, from, size);
+        assertNotNull(itemDto);
+        assertEquals(0, itemDto.size());
 
         userId = owner.getId();
         when(userRepository.findById(userId)).thenReturn(Optional.of(owner));
@@ -118,10 +119,10 @@ class ItemServiceTest {
         when(bookingRepository.findByItemIdInAndStatusOrStatusOrderByStartAsc(List.of(item.getId()),
                 Status.APPROVED, Status.WAITING)).thenReturn(List.of(booking));
         when(itemRepository.findByOwnerId(userId, page)).thenReturn(new PageImpl<>(List.of(item)));
-        itemDtos = itemService.findAllByUserId(userId, from, size);
-        assertNotNull(itemDtos);
-        assertEquals(1, itemDtos.size());
-        assertEquals(booking.getId(), itemDtos.get(0).getLastBooking().getId());
+        itemDto = itemService.findAllByUserId(userId, from, size);
+        assertNotNull(itemDto);
+        assertEquals(1, itemDto.size());
+        assertEquals(booking.getId(), itemDto.get(0).getLastBooking().getId());
     }
 
     @Test
@@ -146,16 +147,16 @@ class ItemServiceTest {
         int size = 1;
 
         String text = "";
-        List<ItemDto> itemDtos = itemService.findByText(text, from, size);
-        assertNotNull(itemDtos);
-        assertEquals(0, itemDtos.size());
+        List<ItemDto> itemDto = itemService.findByText(text, from, size);
+        assertNotNull(itemDto);
+        assertEquals(0, itemDto.size());
 
         text = "Ждун";
         when(itemRepository.searchWithPaging(any(), any())).thenReturn(new PageImpl<>(List.of(item)));
-        itemDtos = itemService.findByText(text, from, size);
-        assertNotNull(itemDtos);
-        assertEquals(1, itemDtos.size());
-        assertEquals(item.getId(), itemDtos.get(0).getId());
+        itemDto = itemService.findByText(text, from, size);
+        assertNotNull(itemDto);
+        assertEquals(1, itemDto.size());
+        assertEquals(item.getId(), itemDto.get(0).getId());
     }
 
     @Test
@@ -257,8 +258,8 @@ class ItemServiceTest {
                 .findByBookerIdAndItemIdAndStatusAndStartIsBefore(anyLong(), anyLong(), any(), any()))
                 .thenReturn(Collections.emptyList());
         String error = String.format("Пользователь с id %s не арендовал вещь с id %s", ownerId, itemId);
-        ValidationException exception = assertThrows(
-                ValidationException.class,
+        BadRequestException exception = assertThrows(
+                BadRequestException.class,
                 () -> itemService.addComment(ownerId, itemId, CommentDto.builder().text("text").build())
         );
         assertEquals(error, exception.getMessage());

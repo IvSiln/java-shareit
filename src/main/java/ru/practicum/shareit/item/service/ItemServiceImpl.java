@@ -10,6 +10,7 @@ import ru.practicum.shareit.booking.enums.Status;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.repository.BookingRepository;
+import ru.practicum.shareit.exception.BadRequestException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemBookingCommentsDto;
@@ -25,7 +26,6 @@ import ru.practicum.shareit.user.repository.UserRepository;
 import ru.practicum.shareit.util.SortUtil;
 import ru.practicum.shareit.validation.Validation;
 
-import javax.validation.ValidationException;
 import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -162,7 +162,7 @@ public class ItemServiceImpl implements ItemService {
                 .findByBookerIdAndItemIdAndStatusAndStartIsBefore(userId, itemId, Status.APPROVED, Instant.now());
         if (bookingsItemByUser.isEmpty()) {
             log.warn("Пользователь с id {} не арендовал вещь с id {}", userId, itemId);
-            throw new ValidationException(
+            throw new BadRequestException(
                     String.format("Пользователь с id %s не арендовал вещь с id %s", userId, itemId));
         }
     }

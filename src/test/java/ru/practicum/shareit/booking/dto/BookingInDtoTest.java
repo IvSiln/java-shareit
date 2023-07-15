@@ -13,13 +13,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @JsonTest
 class BookingInDtoTest {
-    @Autowired
-    private JacksonTester<BookingInDto> json;
     private static final LocalDateTime NOW = LocalDateTime.now();
-
     LocalDateTime start;
     LocalDateTime end;
     long itemId;
+    @Autowired
+    private JacksonTester<BookingInDto> json;
 
     @BeforeEach
     void setup() {

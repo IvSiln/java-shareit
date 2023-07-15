@@ -73,6 +73,7 @@ class ItemControllerTest {
                 .andExpect(jsonPath("$[0].id", is(itemDto.getId()), Long.class))
                 .andExpect(jsonPath("$[0].name", is(itemDto.getName()), String.class));
     }
+
     @Test
     void shouldFindById() throws Exception {
         ItemBookingCommentsDto itemBookingCommentsDto = itemBookingCommentsDtoBuilder.id(1L).build();

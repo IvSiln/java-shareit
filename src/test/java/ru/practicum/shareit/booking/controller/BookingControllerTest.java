@@ -14,11 +14,11 @@ import ru.practicum.shareit.booking.dto.BookingOutDto;
 import ru.practicum.shareit.booking.enums.State;
 import ru.practicum.shareit.booking.enums.Status;
 import ru.practicum.shareit.booking.service.BookingService;
+import ru.practicum.shareit.exception.BadRequestException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.user.dto.UserDto;
 
-import javax.validation.ValidationException;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -222,7 +222,7 @@ class BookingControllerTest {
                 .andExpect(jsonPath("$.status", is(bookingOutDto.getStatus().toString()), String.class));
 
         String error = String.format("Бронирование с id %d уже отклонено", 1);
-        when(bookingService.patch(1L, 1L, false)).thenThrow(new ValidationException(error));
+        when(bookingService.patch(1L, 1L, false)).thenThrow(new BadRequestException(error));
         mockMvc.perform(patch(URL + "/1")
                         .header(HEADER, 1)
                         .param("approved", "false"))
@@ -230,6 +230,7 @@ class BookingControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error", containsString(error), String.class));
     }
+
     @Test
     void shouldFindByState() throws Exception {
         LocalDateTime now = LocalDateTime.now();

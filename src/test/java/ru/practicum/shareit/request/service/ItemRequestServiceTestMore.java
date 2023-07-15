@@ -83,7 +83,6 @@ class ItemRequestServiceTestMore {
     }
 
 
-
     private ItemRequestDto makeRequestDto(String description) {
         return ItemRequestDto.builder()
                 .description(description)

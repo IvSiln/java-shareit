@@ -34,19 +34,14 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class ItemRequestServiceTest {
     private static final Sort SORT = SortUtil.DESCENDING_SORT_BY_CREATED;
-
-    @Mock
-    private RequestRepository requestRepository;
-
-    @Mock
-    private UserRepository userRepository;
-
-    @Mock
-    private ItemRepository itemRepository;
-
     @InjectMocks
     RequestServiceImpl requestService;
-
+    @Mock
+    private RequestRepository requestRepository;
+    @Mock
+    private UserRepository userRepository;
+    @Mock
+    private ItemRepository itemRepository;
     private User requester;
     private User owner;
     private Item item;

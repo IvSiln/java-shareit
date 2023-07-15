@@ -8,7 +8,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import ru.practicum.shareit.booking.dto.BookingInDto;
 import ru.practicum.shareit.booking.dto.BookingOutDto;
@@ -16,15 +15,14 @@ import ru.practicum.shareit.booking.enums.State;
 import ru.practicum.shareit.booking.enums.Status;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.repository.BookingRepository;
+import ru.practicum.shareit.exception.BadRequestException;
 import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.exception.UnsupportedStatusException;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 import ru.practicum.shareit.util.SortUtil;
 
-import javax.validation.ValidationException;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -41,8 +39,7 @@ import static org.mockito.Mockito.when;
 class BookingServiceTest {
     private static final Instant NOW = Instant.now();
     private static final ZoneId ZONE_ID = ZoneId.systemDefault();
-    SortUtil sortUtil;
-    private final Sort SORT = sortUtil.DESCENDING_SORT_BY_START;
+    private final Sort SORT = SortUtil.DESCENDING_SORT_BY_START;
     @Mock
     BookingRepository repository;
     @InjectMocks
@@ -140,8 +137,8 @@ class BookingServiceTest {
         when(userRepo.findById(userId)).thenReturn(Optional.of(booker));
 
         String error = "Unknown state: UNSUPPORTED_STATUS";
-        UnsupportedStatusException exception = assertThrows(
-                UnsupportedStatusException.class,
+        BadRequestException exception = assertThrows(
+                BadRequestException.class,
                 () -> service.findByState(userId, State.UNSUPPORTED_STATUS, from, size)
         );
         assertEquals(error, exception.getMessage());
@@ -153,7 +150,7 @@ class BookingServiceTest {
         assertEquals(1, byState.size());
         assertEquals(booking.getId(), byState.get(0).getId());
 
-        when(repository.findByBookerIdAndEndIsBefore(anyLong(), any(), (Pageable) any()))
+        when(repository.findByBookerIdAndEndIsBefore(anyLong(), any(), any()))
                 .thenReturn(new PageImpl<>(List.of(booking)));
 
         byState = service.findByState(userId, State.PAST, from, size);
@@ -163,7 +160,7 @@ class BookingServiceTest {
 
         booking.setEnd(NOW.plusSeconds(120));
 
-        when(repository.findByBookerIdAndStartIsBeforeAndEndIsAfter(anyLong(), any(), any(), (Pageable) any()))
+        when(repository.findByBookerIdAndStartIsBeforeAndEndIsAfter(anyLong(), any(), any(), any()))
                 .thenReturn(new PageImpl<>(List.of(booking)));
 
         byState = service.findByState(userId, State.CURRENT, from, size);
@@ -173,7 +170,7 @@ class BookingServiceTest {
 
         booking.setStart(NOW.plusSeconds(60));
 
-        when(repository.findByBookerIdAndStartIsAfter(anyLong(), any(), (Pageable) any()))
+        when(repository.findByBookerIdAndStartIsAfter(anyLong(), any(), any()))
                 .thenReturn(new PageImpl<>(List.of(booking)));
 
         byState = service.findByState(userId, State.FUTURE, from, size);
@@ -183,7 +180,7 @@ class BookingServiceTest {
 
         booking.setStatus(Status.WAITING);
 
-        when(repository.findByBookerIdAndStatus(anyLong(), any(), (Pageable) any()))
+        when(repository.findByBookerIdAndStatus(anyLong(), any(), any()))
                 .thenReturn(new PageImpl<>(List.of(booking)));
 
         byState = service.findByState(userId, State.WAITING, from, size);
@@ -208,8 +205,8 @@ class BookingServiceTest {
         when(userRepo.findById(userId)).thenReturn(Optional.of(owner));
 
         String error = "Unknown state: UNSUPPORTED_STATUS";
-        UnsupportedStatusException exception = assertThrows(
-                UnsupportedStatusException.class,
+        BadRequestException exception = assertThrows(
+                BadRequestException.class,
                 () -> service.findByOwnerItemsAndState(userId, State.UNSUPPORTED_STATUS, from, size)
         );
         assertEquals(error, exception.getMessage());
@@ -222,7 +219,7 @@ class BookingServiceTest {
         assertEquals(1, bookingOutDto.size());
         assertEquals(booking.getId(), bookingOutDto.get(0).getId());
 
-        when(repository.findByItemOwnerIdAndEndIsBefore(anyLong(), any(), (Pageable) any()))
+        when(repository.findByItemOwnerIdAndEndIsBefore(anyLong(), any(), any()))
                 .thenReturn(new PageImpl<>(List.of(booking)));
 
         bookingOutDto = service.findByOwnerItemsAndState(userId, State.PAST, from, size);
@@ -231,7 +228,7 @@ class BookingServiceTest {
         assertEquals(1, bookingOutDto.size());
 
         booking.setEnd(NOW.plusSeconds(120));
-        when(repository.findByItemOwnerIdAndStartIsBeforeAndEndIsAfter(anyLong(), any(), any(), (Pageable) any()))
+        when(repository.findByItemOwnerIdAndStartIsBeforeAndEndIsAfter(anyLong(), any(), any(), any()))
                 .thenReturn(new PageImpl<>(List.of(booking)));
 
         bookingOutDto = service.findByOwnerItemsAndState(userId, State.CURRENT, from, size);
@@ -240,7 +237,7 @@ class BookingServiceTest {
         assertEquals(1, bookingOutDto.size());
 
         booking.setStart(NOW.plusSeconds(60));
-        when(repository.findByItemOwnerIdAndStartIsAfter(anyLong(), any(), (Pageable) any()))
+        when(repository.findByItemOwnerIdAndStartIsAfter(anyLong(), any(), any()))
                 .thenReturn(new PageImpl<>(List.of(booking)));
 
         bookingOutDto = service.findByOwnerItemsAndState(userId, State.FUTURE, from, size);
@@ -249,7 +246,7 @@ class BookingServiceTest {
         assertEquals(1, bookingOutDto.size());
 
         booking.setStatus(Status.WAITING);
-        when(repository.findByItemOwnerIdAndStatus(anyLong(), any(), (Pageable) any())).thenReturn(new PageImpl<>(List.of(booking)));
+        when(repository.findByItemOwnerIdAndStatus(anyLong(), any(), any())).thenReturn(new PageImpl<>(List.of(booking)));
 
         bookingOutDto = service.findByOwnerItemsAndState(userId, State.WAITING, from, size);
 
@@ -257,7 +254,7 @@ class BookingServiceTest {
         assertEquals(1, bookingOutDto.size());
 
         booking.setStatus(Status.REJECTED);
-        when(repository.findByItemOwnerIdAndStatus(anyLong(), any(), (Pageable) any())).thenReturn(new PageImpl<>(List.of(booking)));
+        when(repository.findByItemOwnerIdAndStatus(anyLong(), any(), any())).thenReturn(new PageImpl<>(List.of(booking)));
 
         bookingOutDto = service.findByOwnerItemsAndState(userId, State.REJECTED, from, size);
 
@@ -290,8 +287,8 @@ class BookingServiceTest {
         when(userRepo.findById(bookerId)).thenReturn(Optional.of(booker));
         when(itemRepo.findById(itemId)).thenReturn(Optional.of(item));
         error = String.format("Вещь с id %d  недоступна для бронирования", itemId);
-        ValidationException ex = assertThrows(
-                ValidationException.class,
+        BadRequestException ex = assertThrows(
+                BadRequestException.class,
                 () -> service.add(bookerId, bookingToSave));
         assertEquals(error, ex.getMessage());
 
@@ -301,7 +298,7 @@ class BookingServiceTest {
                 .thenReturn(List.of(booking2));
         error = "Время для аренды недоступно";
         ex = assertThrows(
-                ValidationException.class,
+                BadRequestException.class,
                 () -> service.add(bookerId, bookingToSave));
         assertEquals(error, ex.getMessage());
 
@@ -323,8 +320,8 @@ class BookingServiceTest {
         when(repository.findById(bookingId)).thenReturn(Optional.of(booking));
 
         String error = String.format("Бронирование с id %d уже подтверждено", bookingId);
-        ValidationException exception = assertThrows(
-                ValidationException.class,
+        BadRequestException exception = assertThrows(
+                BadRequestException.class,
                 () -> service.patch(userId, bookingId, true)
         );
         assertEquals(error, exception.getMessage());

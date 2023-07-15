@@ -19,12 +19,10 @@ import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 import ru.practicum.shareit.util.SortUtil;
 
-import javax.validation.ValidationException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -50,28 +48,28 @@ public class RequestServiceImpl implements RequestService {
 
     @Override
     public List<ItemRequestDto> findAllByUserId(Long userId) {
-        User user = findUserById(userId);
-        List<ItemRequestDto> itemRequestDtos = requestRepository.findByRequesterId(userId).stream()
+        findUserById(userId);
+        List<ItemRequestDto> itemRequestDto = requestRepository.findByRequesterId(userId).stream()
                 .map(RequestMapper::toItemRequestDto)
                 .collect(Collectors.toList());
-        addItemsToRequests(itemRequestDtos);
-        return itemRequestDtos;
+        addItemsToRequests(itemRequestDto);
+        return itemRequestDto;
     }
 
     @Override
     public List<ItemRequestDto> findAll(long userId, int from, int size) {
-        User user = findUserById(userId);
+        findUserById(userId);
         PageRequest page = PageRequest.of(from / size, size, SORT);
-        List<ItemRequestDto> itemRequestDtos = requestRepository.findByRequesterIdNot(userId, page)
+        List<ItemRequestDto> itemRequestDto = requestRepository.findByRequesterIdNot(userId, page)
                 .map(RequestMapper::toItemRequestDto)
                 .getContent();
-        addItemsToRequests(itemRequestDtos);
-        return itemRequestDtos;
+        addItemsToRequests(itemRequestDto);
+        return itemRequestDto;
     }
 
     @Override
     public ItemRequestDto findById(long userId, long requestId) {
-        User user = findUserById(userId);
+        findUserById(userId);
         ItemRequest itemRequest = findRequestById(requestId);
         ItemRequestDto requestDto = RequestMapper.toItemRequestDto(itemRequest);
         List<ItemDto> items = itemRepository.findByRequestId(requestId).stream()
@@ -91,23 +89,23 @@ public class RequestServiceImpl implements RequestService {
                 .orElseThrow(() -> new NotFoundException(String.format("Запрос с id %d не найден", requestId)));
     }
 
-    private void addItemsToRequests(List<ItemRequestDto> itemRequestDtos) {
-        List<Long> requestIds = itemRequestDtos.stream()
+    private void addItemsToRequests(List<ItemRequestDto> itemRequestDto) {
+        List<Long> requestIds = itemRequestDto.stream()
                 .map(ItemRequestDto::getId)
                 .collect(Collectors.toList());
-        List<ItemDto> itemDtos = itemRepository.findByRequestIdIn(requestIds).stream()
+        List<ItemDto> itemDto = itemRepository.findByRequestIdIn(requestIds).stream()
                 .map(ItemMapper::toItemDto)
                 .collect(Collectors.toList());
 
-        if (itemDtos.isEmpty()) {
+        if (itemDto.isEmpty()) {
             return;
         }
 
         Map<Long, ItemRequestDto> requests = new HashMap<>();
         Map<Long, List<ItemDto>> items = new HashMap<>();
 
-        itemDtos.forEach(dto -> items.computeIfAbsent(dto.getRequestId(), key -> new ArrayList<>()).add(dto));
-        itemRequestDtos.forEach(request -> requests.put(request.getId(), request));
+        itemDto.forEach(dto -> items.computeIfAbsent(dto.getRequestId(), key -> new ArrayList<>()).add(dto));
+        itemRequestDto.forEach(request -> requests.put(request.getId(), request));
         items.forEach((key, value) -> requests.get(key).addAllItems(value));
     }
 }

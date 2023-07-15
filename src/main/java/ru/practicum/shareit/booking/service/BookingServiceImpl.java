@@ -13,15 +13,14 @@ import ru.practicum.shareit.booking.enums.Status;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.repository.BookingRepository;
+import ru.practicum.shareit.exception.BadRequestException;
 import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.exception.UnsupportedStatusException;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 import ru.practicum.shareit.util.SortUtil;
 
-import javax.validation.ValidationException;
 import java.time.Instant;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -81,7 +80,7 @@ public class BookingServiceImpl implements BookingService {
                 break;
             default:
                 log.warn("Unknown state: UNSUPPORTED_STATUS");
-                throw new UnsupportedStatusException("Unknown state: UNSUPPORTED_STATUS");
+                throw new BadRequestException("Unknown state: UNSUPPORTED_STATUS");
         }
         return bookings.stream().map(BookingMapper::toBookingDtoOut).collect(Collectors.toList());
     }
@@ -113,7 +112,7 @@ public class BookingServiceImpl implements BookingService {
                 break;
             default:
                 log.warn("Unknown state: UNSUPPORTED_STATUS");
-                throw new UnsupportedStatusException("Unknown state: UNSUPPORTED_STATUS");
+                throw new BadRequestException("Unknown state: UNSUPPORTED_STATUS");
         }
         return bookings.stream().map(BookingMapper::toBookingDtoOut).collect(Collectors.toList());
     }
@@ -131,12 +130,12 @@ public class BookingServiceImpl implements BookingService {
         }
         if (!item.isAvailable()) {
             log.warn("Вещь с id {} недоступна для бронирования", itemId);
-            throw new ValidationException(String.format(
+            throw new BadRequestException(String.format(
                     "Вещь с id %d  недоступна для бронирования", itemId));
         }
         if (!bookingDto.getEnd().isAfter(bookingDto.getStart())) {
             log.warn("Дата окончания бронирования должна быть после даты начала");
-            throw new ValidationException("Дата окончания бронирования должна быть после даты начала");
+            throw new BadRequestException("Дата окончания бронирования должна быть после даты начала");
         }
         Booking booking = BookingMapper.toBooking(bookingDto);
         Instant start = booking.getStart();
@@ -144,7 +143,7 @@ public class BookingServiceImpl implements BookingService {
         List<Booking> bookingsAtSameTime = bookingRepository.findBookingsAtSameTime(itemId, Status.APPROVED, start, end);
         if (!bookingsAtSameTime.isEmpty()) {
             log.warn("Время для аренды недоступно");
-            throw new ValidationException("Время для аренды недоступно");
+            throw new BadRequestException("Время для аренды недоступно");
         }
 
         booking.setBooker(booker);
@@ -170,13 +169,13 @@ public class BookingServiceImpl implements BookingService {
         if (approved) {
             if (booking.getStatus().equals(Status.APPROVED)) {
                 log.warn("Бронирование с id {} уже подтверждено", bookingId);
-                throw new ValidationException(String.format("Бронирование с id %d уже подтверждено", bookingId));
+                throw new BadRequestException(String.format("Бронирование с id %d уже подтверждено", bookingId));
             }
             status = Status.APPROVED;
         } else {
             if (booking.getStatus().equals(Status.REJECTED)) {
                 log.warn("Бронирование с id {} уже отклонено", bookingId);
-                throw new ValidationException(String.format("Бронирование с id %d уже отклонено", bookingId));
+                throw new BadRequestException(String.format("Бронирование с id %d уже отклонено", bookingId));
             }
             status = Status.REJECTED;
         }
