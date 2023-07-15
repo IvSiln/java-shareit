@@ -21,9 +21,9 @@ import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.repository.ItemRepository;
-import ru.practicum.shareit.item.service.ItemServiceImpl;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
+import ru.practicum.shareit.util.SortUtil;
 
 import javax.validation.ValidationException;
 import java.time.Instant;
@@ -32,15 +32,13 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ItemServiceTest {
-    private static final Sort SORT = Sort.by(Sort.Direction.DESC, "created");
+    private static final Sort SORT = SortUtil.DESCENDING_SORT_BY_CREATED;
     private static final Instant NOW = Instant.now();
     @Mock
     ItemRepository itemRepository;

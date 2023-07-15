@@ -1,15 +1,11 @@
 package ru.practicum.shareit.request.dto;
 
 import org.junit.jupiter.api.Test;
-import ru.practicum.shareit.requests.dto.ItemRequestNewDto;
 
-import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
-
 import java.time.LocalDateTime;
-import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;

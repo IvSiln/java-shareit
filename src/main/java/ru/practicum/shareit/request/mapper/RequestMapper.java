@@ -1,9 +1,9 @@
-package ru.practicum.shareit.requests.mapper;
+package ru.practicum.shareit.request.mapper;
 
 
-import ru.practicum.shareit.requests.dto.ItemRequestDto;
-import ru.practicum.shareit.requests.dto.ItemRequestNewDto;
-import ru.practicum.shareit.requests.model.ItemRequest;
+import ru.practicum.shareit.request.dto.ItemRequestDto;
+import ru.practicum.shareit.request.dto.ItemRequestNewDto;
+import ru.practicum.shareit.request.model.ItemRequest;
 
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
@@ -28,6 +28,12 @@ public class RequestMapper {
                 .description(itemRequest.getDescription())
                 .created(created)
                 .build();
+    }
+
+    public static ItemRequest toItemRequest(ItemRequestDto itemRequestDto) {
+        ItemRequest itemRequest = new ItemRequest();
+        itemRequest.setDescription(itemRequestDto.getDescription());
+        return itemRequest;
     }
 
     public static ItemRequest toItemRequest(ItemRequestNewDto itemRequestNewDto) {

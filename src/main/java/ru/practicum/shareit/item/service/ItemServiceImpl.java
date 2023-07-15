@@ -22,6 +22,7 @@ import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
+import ru.practicum.shareit.util.SortUtil;
 import ru.practicum.shareit.validation.Validation;
 
 import javax.validation.ValidationException;
@@ -34,7 +35,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @AllArgsConstructor
 public class ItemServiceImpl implements ItemService {
-    private static final Sort SORT = Sort.by(Sort.Direction.DESC, "created");
+    private static final Sort SORT = SortUtil.DESCENDING_SORT_BY_CREATED;
 
     private final ItemRepository itemRepository;
     private final UserRepository userRepository;

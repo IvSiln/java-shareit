@@ -1,7 +1,7 @@
-package ru.practicum.shareit.requests.service;
+package ru.practicum.shareit.request.service;
 
-import ru.practicum.shareit.requests.dto.ItemRequestDto;
-import ru.practicum.shareit.requests.dto.ItemRequestNewDto;
+import ru.practicum.shareit.request.dto.ItemRequestDto;
+import ru.practicum.shareit.request.dto.ItemRequestNewDto;
 
 import java.util.List;
 

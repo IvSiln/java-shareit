@@ -16,13 +16,13 @@ import ru.practicum.shareit.booking.enums.State;
 import ru.practicum.shareit.booking.enums.Status;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.repository.BookingRepository;
-import ru.practicum.shareit.booking.service.BookingServiceImpl;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.UnsupportedStatusException;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
+import ru.practicum.shareit.util.SortUtil;
 
 import javax.validation.ValidationException;
 import java.time.Instant;
@@ -33,29 +33,24 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class BookingServiceTest {
-    private static final Sort SORT = Sort.by(Sort.Direction.DESC, "start");
     private static final Instant NOW = Instant.now();
     private static final ZoneId ZONE_ID = ZoneId.systemDefault();
-
+    SortUtil sortUtil;
+    private final Sort SORT = sortUtil.DESCENDING_SORT_BY_START;
     @Mock
     BookingRepository repository;
-
-    @Mock
-    private UserRepository userRepo;
-
-    @Mock
-    private ItemRepository itemRepo;
-
     @InjectMocks
     BookingServiceImpl service;
-
+    @Mock
+    private UserRepository userRepo;
+    @Mock
+    private ItemRepository itemRepo;
     private User owner;
     private User booker;
 

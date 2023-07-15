@@ -7,10 +7,10 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import ru.practicum.shareit.requests.model.ItemRequest;
-import ru.practicum.shareit.requests.repository.RequestRepository;
+import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
+import ru.practicum.shareit.util.SortUtil;
 
 import java.util.List;
 
@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest
 class ItemRequestRepositoryTest {
-    private static final Sort SORT = Sort.by(Sort.Direction.DESC, "created");
+    private static final Sort SORT = SortUtil.DESCENDING_SORT_BY_CREATED;
 
     @Autowired
     private TestEntityManager entityManager;

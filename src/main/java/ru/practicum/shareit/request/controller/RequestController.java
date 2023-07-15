@@ -1,12 +1,12 @@
-package ru.practicum.shareit.requests.controller;
+package ru.practicum.shareit.request.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.requests.dto.ItemRequestDto;
-import ru.practicum.shareit.requests.dto.ItemRequestNewDto;
-import ru.practicum.shareit.requests.service.RequestService;
+import ru.practicum.shareit.request.dto.ItemRequestDto;
+import ru.practicum.shareit.request.dto.ItemRequestNewDto;
+import ru.practicum.shareit.request.service.RequestService;
 import ru.practicum.shareit.validation.ValidationType;
 
 import javax.validation.Valid;

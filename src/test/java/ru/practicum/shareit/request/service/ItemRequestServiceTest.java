@@ -14,13 +14,13 @@ import org.springframework.data.domain.Sort;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
-import ru.practicum.shareit.requests.dto.ItemRequestDto;
-import ru.practicum.shareit.requests.dto.ItemRequestNewDto;
-import ru.practicum.shareit.requests.model.ItemRequest;
-import ru.practicum.shareit.requests.repository.RequestRepository;
-import ru.practicum.shareit.requests.service.RequestServiceImpl;
+import ru.practicum.shareit.request.dto.ItemRequestDto;
+import ru.practicum.shareit.request.dto.ItemRequestNewDto;
+import ru.practicum.shareit.request.model.ItemRequest;
+import ru.practicum.shareit.request.repository.RequestRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
+import ru.practicum.shareit.util.SortUtil;
 
 import java.time.Instant;
 import java.util.Collections;
@@ -28,13 +28,12 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class ItemRequestServiceTest {
-    private static final Sort SORT = Sort.by(Sort.Direction.DESC, "created");
+    private static final Sort SORT = SortUtil.DESCENDING_SORT_BY_CREATED;
 
     @Mock
     private RequestRepository requestRepository;

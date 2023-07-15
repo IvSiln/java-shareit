@@ -1,10 +1,11 @@
 package ru.practicum.shareit.booking.dto;
+
 import org.junit.jupiter.api.Test;
 import ru.practicum.shareit.booking.enums.Status;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import java.time.LocalDateTime;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class BookingResponseDtoTest {
 

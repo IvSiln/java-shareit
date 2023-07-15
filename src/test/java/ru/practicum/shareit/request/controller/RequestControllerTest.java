@@ -10,10 +10,9 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.requests.controller.RequestController;
-import ru.practicum.shareit.requests.dto.ItemRequestDto;
-import ru.practicum.shareit.requests.dto.ItemRequestNewDto;
-import ru.practicum.shareit.requests.service.RequestService;
+import ru.practicum.shareit.request.dto.ItemRequestDto;
+import ru.practicum.shareit.request.dto.ItemRequestNewDto;
+import ru.practicum.shareit.request.service.RequestService;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;

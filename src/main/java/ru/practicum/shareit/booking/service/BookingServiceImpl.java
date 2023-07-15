@@ -19,6 +19,7 @@ import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
+import ru.practicum.shareit.util.SortUtil;
 
 import javax.validation.ValidationException;
 import java.time.Instant;
@@ -30,7 +31,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @AllArgsConstructor
 public class BookingServiceImpl implements BookingService {
-    private static final Sort SORT = Sort.by(Sort.Direction.DESC, "start");
+    private static final Sort DEFAULT_SORT = SortUtil.DESCENDING_SORT_BY_START;
 
     private final BookingRepository bookingRepository;
     private final UserRepository userRepository;
@@ -58,7 +59,7 @@ public class BookingServiceImpl implements BookingService {
 
         List<Booking> bookings;
         Instant now = Instant.now();
-        PageRequest page = PageRequest.of(from / size, size, SORT);
+        PageRequest page = PageRequest.of(from / size, size, DEFAULT_SORT);
         switch (state) {
             case ALL:
                 bookings = bookingRepository.findByBookerId(userId, page).getContent();
@@ -90,7 +91,7 @@ public class BookingServiceImpl implements BookingService {
         trowIsNotExist(userId);
         List<Booking> bookings;
         Instant now = Instant.now();
-        PageRequest page = PageRequest.of(from / size, size, SORT);
+        PageRequest page = PageRequest.of(from / size, size, DEFAULT_SORT);
         switch (state) {
             case ALL:
                 bookings = bookingRepository.findByItemOwnerId(userId, page).getContent();
