@@ -39,7 +39,7 @@ import static org.mockito.Mockito.when;
 class BookingServiceTest {
     private static final Instant NOW = Instant.now();
     private static final ZoneId ZONE_ID = ZoneId.systemDefault();
-    private final Sort SORT = SortUtil.DESCENDING_SORT_BY_START;
+    private static final Sort SORT = SortUtil.DESCENDING_SORT_BY_START;
     @Mock
     BookingRepository repository;
     @InjectMocks
@@ -133,7 +133,7 @@ class BookingServiceTest {
         int from = 0;
         int size = 1;
         long userId = booker.getId();
-        PageRequest page = PageRequest.of(0, size, SORT);
+        PageRequest page = PageRequest.of(0, size, sortByStart);
         when(userRepo.findById(userId)).thenReturn(Optional.of(booker));
 
         String error = "Unknown state: UNSUPPORTED_STATUS";
@@ -201,7 +201,7 @@ class BookingServiceTest {
         int from = 0;
         int size = 1;
         long userId = owner.getId();
-        PageRequest page = PageRequest.of(0, size, SORT);
+        PageRequest page = PageRequest.of(0, size, sortByStart);
         when(userRepo.findById(userId)).thenReturn(Optional.of(owner));
 
         String error = "Unknown state: UNSUPPORTED_STATUS";
