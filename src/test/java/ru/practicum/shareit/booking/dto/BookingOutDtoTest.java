@@ -16,11 +16,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @JsonTest
 class BookingOutDtoTest {
-    @Autowired
-    private JacksonTester<BookingOutDto> json;
-
     private static final LocalDateTime START = LocalDateTime.of(2023, 1, 1, 0, 0);
     private static final LocalDateTime END = LocalDateTime.of(2023, 1, 2, 0, 0);
+    @Autowired
+    private JacksonTester<BookingOutDto> json;
 
     @BeforeEach
     void setup() {

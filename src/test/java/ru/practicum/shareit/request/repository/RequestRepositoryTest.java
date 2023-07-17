@@ -17,7 +17,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest
-class ItemRequestRepositoryTest {
+class RequestRepositoryTest {
     private static final Sort SORT = SortUtil.DESCENDING_SORT_BY_CREATED;
 
     @Autowired
