@@ -1,7 +1,6 @@
 package ru.practicum.shareit.booking.enums;
 
 import org.junit.jupiter.api.Test;
-import ru.practicum.shareit.booking.enums.State;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
