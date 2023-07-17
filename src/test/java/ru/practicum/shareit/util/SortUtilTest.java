@@ -1,10 +1,11 @@
 package ru.practicum.shareit.util;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.autoconfigure.json.JsonTest;
 import org.springframework.data.domain.Sort;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-
+@JsonTest
 public class SortUtilTest {
 
     @Test
