@@ -43,8 +43,8 @@ public class Comment {
         return id != null && id.equals(((Comment) o).getId());
     }
 
-    @Override
-    public int hashCode() {
-        return getClass().hashCode();
-    }
+//    @Override
+//    public int hashCode() {
+//        return getClass().hashCode();
+//    }
 }

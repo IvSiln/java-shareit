@@ -1,10 +1,12 @@
 package ru.practicum.shareit.exception;
 
 import lombok.Data;
+import lombok.Getter;
 
 import java.util.Map;
 
 @Data
+@Getter
 public class ErrorResponse {
     String error;
 
