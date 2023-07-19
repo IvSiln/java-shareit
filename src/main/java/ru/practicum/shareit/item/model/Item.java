@@ -7,6 +7,7 @@ import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.model.User;
 
 import javax.persistence.*;
+import java.util.Objects;
 
 @Entity
 @Table(name = "items")
@@ -36,6 +37,11 @@ public class Item {
     @ToString.Exclude
     @JoinColumn(name = "request_id")
     private ItemRequest request;
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, name, description, available, owner, request);
+    }
 
     @Override
     public boolean equals(Object o) {

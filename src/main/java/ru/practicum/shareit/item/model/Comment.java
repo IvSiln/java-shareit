@@ -8,6 +8,7 @@ import ru.practicum.shareit.user.model.User;
 
 import javax.persistence.*;
 import java.time.Instant;
+import java.util.Objects;
 
 @Entity
 @Table(name = "comments")
@@ -31,6 +32,11 @@ public class Comment {
     @ToString.Exclude
     @JoinColumn(name = "author_id")
     User author;
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, text, item, author, created);
+    }
 
     @Column(name = "created")
     @CreationTimestamp

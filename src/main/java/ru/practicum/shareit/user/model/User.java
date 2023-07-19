@@ -5,6 +5,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 import javax.persistence.*;
+import java.util.Objects;
 
 @Entity
 @Table(name = "users")
@@ -21,6 +22,11 @@ public class User {
 
     @Column(name = "email", nullable = false, unique = true)
     private String email;
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, name, email);
+    }
 
     @Override
     public boolean equals(Object o) {
