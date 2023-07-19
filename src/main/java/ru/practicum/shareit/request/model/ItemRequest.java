@@ -8,6 +8,7 @@ import ru.practicum.shareit.user.model.User;
 
 import javax.persistence.*;
 import java.time.Instant;
+import java.util.Objects;
 
 @Getter
 @Setter
@@ -24,6 +25,19 @@ public class ItemRequest {
 
     @Column(name = "description")
     private String description;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ItemRequest that = (ItemRequest) o;
+        return Objects.equals(created, that.created) && Objects.equals(id, that.id) && Objects.equals(description, that.description) && Objects.equals(requester, that.requester);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(created, id, description, requester);
+    }
 
     @ManyToOne(fetch = FetchType.LAZY)
     @ToString.Exclude

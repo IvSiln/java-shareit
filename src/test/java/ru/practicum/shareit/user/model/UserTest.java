@@ -21,5 +21,7 @@ class UserTest {
         // Test equals method
         assertEquals(user1, user2); // Objects with the same id should be considered equal
         assertNotEquals(user1, user3); // Objects with different ids should not be considered equal
+        assertEquals(user1.hashCode(), user2.hashCode()); // Objects with the same id should have the same hash code
+        assertNotEquals(user1.hashCode(), user3.hashCode()); // Objects with different ids should have different hash codes
     }
 }

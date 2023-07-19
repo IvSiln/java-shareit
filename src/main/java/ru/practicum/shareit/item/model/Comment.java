@@ -33,11 +33,6 @@ public class Comment {
     @JoinColumn(name = "author_id")
     User author;
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, text, item, author, created);
-    }
-
     @Column(name = "created")
     @CreationTimestamp
     Instant created;
@@ -45,12 +40,13 @@ public class Comment {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Comment)) return false;
-        return id != null && id.equals(((Comment) o).getId());
+        if (o == null || getClass() != o.getClass()) return false;
+        Comment comment = (Comment) o;
+        return Objects.equals(id, comment.id) && Objects.equals(text, comment.text) && Objects.equals(item, comment.item) && Objects.equals(author, comment.author) && Objects.equals(created, comment.created);
     }
 
-//    @Override
-//    public int hashCode() {
-//        return getClass().hashCode();
-//    }
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, text, item, author, created);
+    }
 }

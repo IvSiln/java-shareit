@@ -19,5 +19,8 @@ public class CommentTest {
 
         assertEquals(comment1, comment2); // Проверка на равенство объектов с одинаковыми id
         assertNotEquals(comment1, comment3); // Проверка на неравенство объектов с разными id
+
+        assertEquals(comment1.hashCode(), comment2.hashCode()); // Проверка на равенство hashCode для объектов с одинаковыми id
+        assertFalse(comment1.hashCode() == comment3.hashCode()); // Проверка на неравенство hashCode для объектов с разными id
     }
 }
