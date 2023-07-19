@@ -31,4 +31,5 @@ public class ErrorResponseTest {
         assertNull(response.getError());
         assertEquals(validationErrors, response.getValidationErrors());
     }
+
 }

@@ -19,7 +19,7 @@ class ItemTest {
         item3.setId(2L);
 
         // Test equals method
-        assertTrue(item1.equals(item2)); // Objects with the same id should be considered equal
-        assertFalse(item1.equals(item3)); // Objects with different ids should not be considered equal
+        assertEquals(item1, item2); // Objects with the same id should be considered equal
+        assertNotEquals(item1, item3); // Objects with different ids should not be considered equal
     }
 }

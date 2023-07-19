@@ -19,7 +19,7 @@ class UserTest {
         user3.setId(2L);
 
         // Test equals method
-        assertTrue(user1.equals(user2)); // Objects with the same id should be considered equal
-        assertFalse(user1.equals(user3)); // Objects with different ids should not be considered equal
+        assertEquals(user1, user2); // Objects with the same id should be considered equal
+        assertNotEquals(user1, user3); // Objects with different ids should not be considered equal
     }
 }

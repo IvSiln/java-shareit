@@ -27,4 +27,5 @@ public class ErrorHandlerTest {
         assertNotNull(response.getError());
         assertNull(response.getValidationErrors());
     }
+
 }
