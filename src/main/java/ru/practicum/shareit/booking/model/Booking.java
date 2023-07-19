@@ -31,6 +31,13 @@ public class Booking {
     @ToString.Exclude
     @JoinColumn(name = "item_id")
     private Item item;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @ToString.Exclude
+    @JoinColumn(name = "booker_id")
+    private User booker;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private Status status;
 
     @Override
     public boolean equals(Object o) {
@@ -44,13 +51,4 @@ public class Booking {
     public int hashCode() {
         return Objects.hash(id, start, end, item, booker, status);
     }
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @ToString.Exclude
-    @JoinColumn(name = "booker_id")
-    private User booker;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false)
-    private Status status;
 }

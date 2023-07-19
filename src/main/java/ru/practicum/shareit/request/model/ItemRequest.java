@@ -25,6 +25,10 @@ public class ItemRequest {
 
     @Column(name = "description")
     private String description;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @ToString.Exclude
+    @JoinColumn(name = "requester_id")
+    private User requester;
 
     @Override
     public boolean equals(Object o) {
@@ -38,9 +42,4 @@ public class ItemRequest {
     public int hashCode() {
         return Objects.hash(created, id, description, requester);
     }
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @ToString.Exclude
-    @JoinColumn(name = "requester_id")
-    private User requester;
 }

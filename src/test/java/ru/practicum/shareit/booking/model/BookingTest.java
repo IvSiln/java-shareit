@@ -65,6 +65,7 @@ public class BookingTest {
 
         assertEquals(status, booking.getStatus());
     }
+
     @Test
     void testEqualsAndHashCode() {
         // Create two Booking objects with the same attributes

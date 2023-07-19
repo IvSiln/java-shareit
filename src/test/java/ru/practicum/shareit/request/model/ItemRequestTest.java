@@ -1,7 +1,9 @@
 package ru.practicum.shareit.request.model;
 
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 class ItemRequestTest {
 
@@ -19,8 +21,8 @@ class ItemRequestTest {
         request3.setId(2L);
 
         // Test equals method
-        assertTrue(request1.equals(request2)); // Objects with the same id should be considered equal
-        assertFalse(request1.equals(request3)); // Objects with different ids should not be considered equal
+        assertEquals(request1, request2); // Objects with the same id should be considered equal
+        assertNotEquals(request1, request3); // Objects with different ids should not be considered equal
 
         // Test hashCode method
         assertEquals(request1.hashCode(), request2.hashCode()); // Objects with the same id should have the same hash code
