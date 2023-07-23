@@ -8,11 +8,11 @@ import ru.practicum.shareit.booking.dto.BookingInDto;
 import ru.practicum.shareit.booking.dto.BookingOutDto;
 import ru.practicum.shareit.booking.enums.State;
 import ru.practicum.shareit.booking.service.BookingService;
-import ru.practicum.shareit.exception.UnsupportedStatusException;
-import ru.practicum.shareit.validation.ValidationType.Create;
-import ru.practicum.shareit.validation.ValidationType.Update;
+import ru.practicum.shareit.validation.ValidationType;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.Positive;
 import java.util.List;
 
 @RestController
@@ -20,50 +20,45 @@ import java.util.List;
 @RequiredArgsConstructor
 @Validated
 public class BookingController {
-    private final BookingService bookingService;
-    private final String userIdHeader = "X-Sharer-User-Id";
+    private final BookingService service;
 
     @GetMapping("{bookingId}")
-    public BookingOutDto findById(@RequestHeader(userIdHeader) Long userId,
+    public BookingOutDto findById(@RequestHeader("X-Sharer-User-Id") Long userId,
                                   @PathVariable long bookingId) {
-        return bookingService.findById(userId, bookingId);
+        return service.findById(userId, bookingId);
     }
 
     @GetMapping
-    public List<BookingOutDto> findByState(@RequestHeader(userIdHeader) Long userId,
-                                           @RequestParam(defaultValue = "ALL") State state) {
-        if (state == State.UNSUPPORTED_STATUS) {//так работает, но как то не изящно получается
-            throw new UnsupportedStatusException("Unknown state: UNSUPPORTED_STATUS");
-        }
-
-        return bookingService.findByState(userId, state);
+    public List<BookingOutDto> findByState(@RequestHeader("X-Sharer-User-Id") Long userId,
+                                           @RequestParam(defaultValue = "ALL") State state,
+                                           @RequestParam(defaultValue = "0") @Min(value = 0) int from,
+                                           @RequestParam(defaultValue = "10") @Positive int size) {
+        return service.findByState(userId, state, from, size);
     }
 
     @GetMapping("/owner")
-    public List<BookingOutDto> findByOwnerItemsAndState(@RequestHeader(userIdHeader) Long userId,
-                                                        @RequestParam(defaultValue = "ALL") State state) {
-        if (state == State.UNSUPPORTED_STATUS) {
-            throw new UnsupportedStatusException("Unknown state: UNSUPPORTED_STATUS");
-        }
-
-        return bookingService.findByOwnerItemsAndState(userId, state);
+    public List<BookingOutDto> findByOwnerItemsAndState(@RequestHeader("X-Sharer-User-Id") Long userId,
+                                                        @RequestParam(defaultValue = "ALL") State state,
+                                                        @RequestParam(defaultValue = "0")
+                                                        @Min(value = 0) int from,
+                                                        @RequestParam(defaultValue = "10") @Positive int size) {
+        return service.findByOwnerItemsAndState(userId, state, from, size);
     }
-
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    @Validated(Create.class)
-    public BookingOutDto add(@RequestHeader(userIdHeader) Long userId,
+    @Validated(ValidationType.Create.class)
+    public BookingOutDto add(@RequestHeader("X-Sharer-User-Id") Long userId,
                              @Valid @RequestBody BookingInDto bookingDto) {
-        return bookingService.add(userId, bookingDto);
+        return service.add(userId, bookingDto);
     }
 
     @PatchMapping("/{bookingId}")
     @ResponseStatus(HttpStatus.OK)
-    @Validated(Update.class)
-    public BookingOutDto patch(@RequestHeader(userIdHeader) Long userId,
+    @Validated(ValidationType.Update.class)
+    public BookingOutDto patch(@RequestHeader("X-Sharer-User-Id") Long userId,
                                @PathVariable("bookingId") long bookingId,
                                @RequestParam boolean approved) {
-        return bookingService.patch(userId, bookingId, approved);
+        return service.patch(userId, bookingId, approved);
     }
 }

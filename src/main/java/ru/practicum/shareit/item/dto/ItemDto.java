@@ -14,17 +14,17 @@ import static ru.practicum.shareit.validation.ValidationType.Create;
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ItemDto {
-    private Long id;
+    Long id;
 
     @NotBlank(groups = Create.class, message = "Название не может быть пустым")
-    private String name;
+    String name;
 
     @NotBlank(groups = Create.class, message = "Описание не может быть пустым")
     @Size(max = 200, message = "Длина описания должна до 200 символов")
-    private String description;
+    String description;
 
     @NotNull(groups = Create.class, message = "Поле доступности вещи не может быть пустым")
-    private Boolean available;
+    Boolean available;
 
-    private Long requestId;
+    Long requestId;
 }

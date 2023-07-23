@@ -3,10 +3,11 @@ package ru.practicum.shareit.item.model;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import ru.practicum.shareit.request.ItemRequest;
+import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.model.User;
 
 import javax.persistence.*;
+import java.util.Objects;
 
 @Entity
 @Table(name = "items")
@@ -38,14 +39,14 @@ public class Item {
     private ItemRequest request;
 
     @Override
+    public int hashCode() {
+        return Objects.hash(id, name, description, available, owner, request);
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Item)) return false;
         return id != null && id.equals(((Item) o).getId());
-    }
-
-    @Override
-    public int hashCode() {
-        return getClass().hashCode();
     }
 }

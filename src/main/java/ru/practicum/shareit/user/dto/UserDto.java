@@ -13,12 +13,12 @@ import static ru.practicum.shareit.validation.ValidationType.Create;
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class UserDto {
-    private Long id;
+    Long id;
 
     @NotBlank(groups = Create.class, message = "Имя не может быть пустым")
-    private String name;
+    String name;
 
     @NotBlank(groups = Create.class, message = "E-mail не может быть пустым")
     @Email(message = "Введен некорректный e-mail")
-    private String email;
+    String email;
 }

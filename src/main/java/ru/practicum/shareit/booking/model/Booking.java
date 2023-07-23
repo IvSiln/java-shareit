@@ -9,6 +9,7 @@ import ru.practicum.shareit.user.model.User;
 
 import javax.persistence.*;
 import java.time.Instant;
+import java.util.Objects;
 
 @Entity
 @Table(name = "bookings")
@@ -26,16 +27,14 @@ public class Booking {
     @Column(name = "end_date", nullable = false)
     private Instant end;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @ToString.Exclude
     @JoinColumn(name = "item_id")
     private Item item;
-
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @ToString.Exclude
     @JoinColumn(name = "booker_id")
     private User booker;
-
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private Status status;
@@ -43,12 +42,13 @@ public class Booking {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Booking)) return false;
-        return id != null && id.equals(((Booking) o).getId());
+        if (o == null || getClass() != o.getClass()) return false;
+        Booking booking = (Booking) o;
+        return Objects.equals(id, booking.id) && Objects.equals(start, booking.start) && Objects.equals(end, booking.end) && Objects.equals(item, booking.item) && Objects.equals(booker, booking.booker) && status == booking.status;
     }
 
     @Override
     public int hashCode() {
-        return getClass().hashCode();
+        return Objects.hash(id, start, end, item, booker, status);
     }
 }
