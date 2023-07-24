@@ -35,7 +35,6 @@ class ItemRepositoryTest {
 
     private User owner;
     private Item item;
-    private User requester;
     private ItemRequest request;
 
     @BeforeEach
@@ -45,7 +44,7 @@ class ItemRepositoryTest {
         owner.setEmail("e@mail.ru");
         owner = userRepository.save(owner);
 
-        requester = new User();
+        User requester = new User();
         requester.setName("name1");
         requester.setEmail("e1@mail.ru");
         requester = userRepository.save(requester);

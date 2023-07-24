@@ -55,7 +55,7 @@ public class RequestServiceImpl implements RequestService {
 
     @Override
     public List<ItemRequestDto> findAllByUserId(Long userId) {
-        UserDto userDto = userService.findById(userId);
+        userService.findById(userId);
         List<ItemRequestDto> itemRequestDto = requestRepository.findByRequesterId(userId).stream()
                 .map(RequestMapper::toItemRequestDto).collect(Collectors.toList());
         addItemsToRequests(itemRequestDto);
@@ -64,7 +64,7 @@ public class RequestServiceImpl implements RequestService {
 
     @Override
     public List<ItemRequestDto> findAll(long userId, int from, int size) {
-        UserDto userDto = userService.findById(userId);
+        userService.findById(userId);
         PageRequest page = PageRequest.of(from / size, size, SORT);
         List<ItemRequestDto> itemRequestDtos = requestRepository.findByRequesterIdNot(userId, page)
                 .map(RequestMapper::toItemRequestDto).getContent();
@@ -74,7 +74,7 @@ public class RequestServiceImpl implements RequestService {
 
     @Override
     public ItemRequestDto findById(long userId, long requestId) {
-        UserDto userDto = userService.findById(userId);
+        userService.findById(userId);
         ItemRequest itemRequest = requestRepository.findById(requestId)
                 .orElseThrow(() -> new NotFoundException(String.format("Запрос с id %d не найден", requestId)));
         ItemRequestDto requestDto = RequestMapper.toItemRequestDto(itemRequest);
