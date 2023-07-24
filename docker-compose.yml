@@ -1,24 +1,20 @@
 version: '3.8'
 services:
   gateway:
-    build: gateway/
-    image: shareit-gateway-image
-    container_name: shareit-gateway
+    build: ./gateway
+
     ports:
       - "8080:8080"
     depends_on:
       - server
-      - db
     environment:
-      - SERVER_PORT=8080
       - SHAREIT_SERVER_URL=http://server:9090
 
   server:
-    build: server/
-    image: shareit-server-image
-    container_name: shareit-server
-    #    ports:
-    #      - "9090:9090"
+    build: ./server
+
+    ports:
+      - "9090:9090"
     depends_on:
       - db
     environment:
@@ -34,8 +30,8 @@ services:
     volumes:
       - /var/lib/postgresql/data/
       - ./server/src/main/resources/schema.sql:/docker-entrypoint-initdb.d/schema.sql
-    #    ports:
-    #      - "6541:5432"
+    ports:
+      - "6541:5432"
     environment:
       - POSTGRES_DB=shareit
       - POSTGRES_USER=postgres
