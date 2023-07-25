@@ -75,4 +75,5 @@ public class ErrorHandler {
         log.error("Произошла непредвиденная ошибка: " + e.getMessage(), e);
         return new ErrorResponse("Произошла непредвиденная ошибка: " + e.getMessage());
     }
+    
 }
