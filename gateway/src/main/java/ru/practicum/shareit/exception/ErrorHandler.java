@@ -24,9 +24,10 @@ public class ErrorHandler {
 
     private final ObjectMapper mapper = new ObjectMapper().findAndRegisterModules();
 
-    @ExceptionHandler
+    @ExceptionHandler({ValidationException.class, ConstraintViolationException.class,
+            MissingRequestHeaderException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleValidationException(final ValidationException e) {
+    public ErrorResponse BadRequestException(final ValidationException e) {
         log.error(e.getMessage(), e);
         return new ErrorResponse(e.getMessage());
     }
@@ -34,13 +35,6 @@ public class ErrorHandler {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleIllegalArgumentException(final IllegalArgumentException e) {
-        log.error(e.getMessage(), e);
-        return new ErrorResponse(e.getMessage());
-    }
-
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleConstraintViolationException(final ConstraintViolationException e) {
         log.error(e.getMessage(), e);
         return new ErrorResponse(e.getMessage());
     }
@@ -66,13 +60,6 @@ public class ErrorHandler {
         });
         log.error(mapper.writeValueAsString(errors), e);
         return new ErrorResponse(errors);
-    }
-
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleMissingRequestHeaderException(final MissingRequestHeaderException e) {
-        log.error(e.getMessage(), e);
-        return new ErrorResponse(e.getMessage());
     }
 
     @ExceptionHandler

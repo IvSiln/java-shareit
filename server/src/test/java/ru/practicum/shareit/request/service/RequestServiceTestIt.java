@@ -22,7 +22,7 @@ import static org.hamcrest.Matchers.*;
 
 @Transactional
 @SpringBootTest
-class RequestServiceTestIT {
+class RequestServiceTestIt {
     private static final int SIZE_DEFAULT = 10;
 
     @Autowired
