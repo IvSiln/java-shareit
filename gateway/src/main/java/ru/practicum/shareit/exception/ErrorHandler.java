@@ -27,7 +27,7 @@ public class ErrorHandler {
     @ExceptionHandler({ValidationException.class, ConstraintViolationException.class,
             MissingRequestHeaderException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse BadRequestException(final ValidationException e) {
+    public ErrorResponse badRequestException(final ValidationException e) {
         log.error(e.getMessage(), e);
         return new ErrorResponse(e.getMessage());
     }
